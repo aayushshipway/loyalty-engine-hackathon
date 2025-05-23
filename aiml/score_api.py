@@ -15,6 +15,7 @@ db_host = os.getenv("DB_HOST")
 db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 db_name = os.getenv("DB_NAME")
+serverport = os.getenv("PORT")
 
 # DB config
 db_config = {
@@ -191,4 +192,4 @@ def get_loyalty_scores_for_all_platforms(
 
 
 if __name__ == "__main__":
-    uvicorn.run("score_api:app", host="127.0.0.1", port=8001, reload=True)
+    uvicorn.run("score_api:app", host="127.0.0.1", port=serverport, reload=True)
