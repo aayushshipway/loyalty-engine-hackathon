@@ -190,6 +190,7 @@ def get_loyalty_scores_for_all_platforms(email: str = Query(...)):
 
         total_weighted_score = 0
         platform_count = 0
+        merchant_id = ""
 
         for platform in platforms:
             cursor.execute(f"""
@@ -198,11 +199,11 @@ def get_loyalty_scores_for_all_platforms(email: str = Query(...)):
                 WHERE email = %s AND is_{platform} = '1'
             """, (email,))
             row = cursor.fetchone()
-
             if row:
                 try:
                     score_data = get_loyalty_score_by_integration(email=email, platform=platform)
                     multiplier = row.get(f"multiplier_{platform}", 1)
+                    merchant_id = row.get("merchant_id", 0)
                     weighted_score = score_data['loyalty_score'] * multiplier
 
                     results.append(score_data)
@@ -225,17 +226,14 @@ def get_loyalty_scores_for_all_platforms(email: str = Query(...)):
         elif grand_loyalty_score >= 10:
             grand_badge = 'silver'
 
-        # Prepare insert data
-        merchant_id = row.get("merchant_id", 1)
-
         # Insert/Update current score
-        upsert_query = f"""
+        upsert_query = """
             INSERT INTO merchants_scores (
                 merchant_id, grand_score, grand_badge, updated_on
             ) VALUES (%s, %s, %s, NOW())
             ON DUPLICATE KEY UPDATE
-                grand_score = VALUES({grand_loyalty_score}),
-                grand_badge = VALUES({grand_badge}),
+                grand_score = VALUES(grand_score),
+                grand_badge = VALUES(grand_badge),
                 updated_on = NOW()
         """
         cursor.execute(upsert_query, (merchant_id, float(grand_loyalty_score), grand_badge))
