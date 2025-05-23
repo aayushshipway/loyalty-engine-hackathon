@@ -6,7 +6,7 @@ import pymysql
 from dotenv import load_dotenv
 import os
 from urllib.parse import quote_plus
-#from sqlalchemy import create_engine
+from sqlalchemy import create_engine  # ✅ UNCOMMENTED
 
 # Load environment variables
 load_dotenv()
@@ -20,8 +20,7 @@ database = os.getenv("DB_NAME")
 connection_str = f"mysql+pymysql://{user}:{password}@{host}/{database}"
 engine = create_engine(connection_str)
 
-# Connect and fetch data
-conn = pymysql.connect(**db_config)
+# SQL query
 query = """
     SELECT
         m.merchant_id,
