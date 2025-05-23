@@ -293,4 +293,160 @@ const getGrandLoyalty = async (req, res) => {
     }
 }
 
-module.exports = { login, getShipwayLoyalty, getConvertwayLoyalty, getUnicommerceLoyalty, getGrandLoyalty };
+
+const getShipwayLoyaltyHistory = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    console.warn('Email missing in request');
+    return res.status(400).json({ success: false, message: 'Email is required' });
+  }
+
+  try {
+    console.log(`Fetching merchant_id for email: ${email}`);
+    const [merchantResult] = await pool.query('SELECT merchant_id FROM merchants WHERE email = ?', [email]);
+
+    if (merchantResult.length === 0) {
+      console.warn('No merchant found for email:', email);
+      return res.status(404).json({ success: false, message: 'Merchant not found' });
+    }
+    const merchantId = merchantResult[0].merchant_id;
+    const [historyResult] = await pool.query(
+      `SELECT merchant_id, from_date, till_date, loyalty_score_shipway 
+       FROM merchants_scores_history 
+       WHERE merchant_id = ? AND loyalty_score_shipway IS NOT NULL
+       ORDER BY from_date ASC`,
+      [merchantId]
+    );
+
+    if (historyResult.length === 0) {
+      return res.status(404).json({ success: false, message: 'Merchant history not found' });
+    }
+
+    const enhancedHistory = historyResult.map(entry => {
+      const fromDate = new Date(entry.from_date);
+      const isValidDate = !isNaN(fromDate.getTime());
+
+      return {
+        ...entry,
+        month: isValidDate ? fromDate.toLocaleString('default', { month: 'long' }) : null,
+        year: isValidDate ? fromDate.getFullYear() : null
+      };
+    });
+
+    return res.json({
+      success: true,
+      merchantId,
+      history: enhancedHistory
+    });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+const getConvertwayLoyaltyHistory = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    console.warn('Email missing in request');
+    return res.status(400).json({ success: false, message: 'Email is required' });
+  }
+
+  try {
+    console.log(`Fetching merchant_id for email: ${email}`);
+    const [merchantResult] = await pool.query('SELECT merchant_id FROM merchants WHERE email = ?', [email]);
+
+    if (merchantResult.length === 0) {
+      console.warn('No merchant found for email:', email);
+      return res.status(404).json({ success: false, message: 'Merchant not found' });
+    }
+    const merchantId = merchantResult[0].merchant_id;
+    const [historyResult] = await pool.query(
+      `SELECT merchant_id, from_date, till_date, loyalty_score_convertway
+       FROM merchants_scores_history 
+       WHERE merchant_id = ? AND loyalty_score_convertway IS NOT NULL
+       ORDER BY from_date ASC`,
+      [merchantId]
+    );
+
+    if (historyResult.length === 0) {
+      return res.status(404).json({ success: false, message: 'Merchant history not found' });
+    }
+
+    const enhancedHistory = historyResult.map(entry => {
+      const fromDate = new Date(entry.from_date);
+      const isValidDate = !isNaN(fromDate.getTime());
+
+      return {
+        ...entry,
+        month: isValidDate ? fromDate.toLocaleString('default', { month: 'long' }) : null,
+        year: isValidDate ? fromDate.getFullYear() : null
+      };
+    });
+
+    return res.json({
+      success: true,
+      merchantId,
+      history: enhancedHistory
+    });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+const getUnicommerceLoyaltyHistory = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    console.warn('Email missing in request');
+    return res.status(400).json({ success: false, message: 'Email is required' });
+  }
+
+  try {
+    console.log(`Fetching merchant_id for email: ${email}`);
+    const [merchantResult] = await pool.query('SELECT merchant_id FROM merchants WHERE email = ?', [email]);
+
+    if (merchantResult.length === 0) {
+      console.warn('No merchant found for email:', email);
+      return res.status(404).json({ success: false, message: 'Merchant not found' });
+    }
+    const merchantId = merchantResult[0].merchant_id;
+    const [historyResult] = await pool.query(
+      `SELECT merchant_id, from_date, till_date, loyalty_score_unicommerce
+       FROM merchants_scores_history 
+       WHERE merchant_id = ? AND loyalty_score_unicommerce IS NOT NULL 
+       ORDER BY from_date ASC`,
+      [merchantId]
+    );
+
+    if (historyResult.length === 0) {
+      return res.status(404).json({ success: false, message: 'Merchant history not found' });
+    }
+
+    console.log("historyResult",historyResult);
+
+    const enhancedHistory = historyResult.map(entry => {
+      const fromDate = new Date(entry.from_date);
+      const isValidDate = !isNaN(fromDate.getTime());
+
+      return {
+        ...entry,
+        month: isValidDate ? fromDate.toLocaleString('default', { month: 'long' }) : null,
+        year: isValidDate ? fromDate.getFullYear() : null
+      };
+    });
+
+    return res.json({
+      success: true,
+      merchantId,
+      history: enhancedHistory
+    });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+module.exports = { login, getShipwayLoyalty, getConvertwayLoyalty, getUnicommerceLoyalty, getGrandLoyalty, getShipwayLoyaltyHistory, getConvertwayLoyaltyHistory, getUnicommerceLoyaltyHistory };

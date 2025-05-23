@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate } from 're
 import LoginPage from './pages/LoginPage';
 import MerchantDashboard from './pages/MerchantDashboard';
 import MerchantShipwayDashboard from './pages/MerchantShipwayDashboard';
+import MerchantUnicommerceDashboard from './pages/MerchantUnicommerceDashboard';
+import MerchantConvertwayDashboard from './pages/MerchantConvertwayDashboard';
 import UserDashboard from './pages/UserDashboard';
 import { getLSWithExpiry } from './helpers';
 import PrivateRoute from './PrivateRoute';
@@ -105,7 +107,7 @@ function App() {
               path="/merchant-convertway-dashboard"
               element={
                 <PrivateRoute requiredType="merchant">
-                  <MerchantShipwayDashboard />
+                  <MerchantConvertwayDashboard />
                 </PrivateRoute>
               }
             />
@@ -113,7 +115,7 @@ function App() {
               path="/merchant-unicommerce-dashboard"
               element={
                 <PrivateRoute requiredType="merchant">
-                  <MerchantShipwayDashboard />
+                  <MerchantUnicommerceDashboard />
                 </PrivateRoute>
               }
             />

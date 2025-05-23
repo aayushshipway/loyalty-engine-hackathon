@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../css/LoginPage.css';
-import { getLSWithExpiry, setLSWithExpiry } from '../helpers';
+import { setLSWithExpiry } from '../helpers';
 
 function LoginPage() {
     const navigate = useNavigate();
