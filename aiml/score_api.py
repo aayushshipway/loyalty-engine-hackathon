@@ -23,8 +23,8 @@ app = FastAPI(root_path="/loyalty-engine-hackathon/aiml")
 
 # Load trained models
 shipway_loyalty_model = joblib.load("shipway-model.pkl")
-# unicommerce_loyalty_model = joblib.load("unicommerce-model.pkl")
-# convertway_loyalty_model = joblib.load("convertway-model.pkl")
+unicommerce_loyalty_model = joblib.load("unicommerce-model.pkl")
+convertway_loyalty_model = joblib.load("convertway-model.pkl")
 churn_model = joblib.load("merchant_churn_model.pkl")
 
 # Feature list
@@ -52,10 +52,11 @@ CHURN_FEATURES = [
 
 # Model map
 model_map = {
-    'shipway': shipway_loyalty_model
-    # 'unicommerce': unicommerce_loyalty_model,
-    # 'convertway': convertway_loyalty_model
+    'shipway': shipway_loyalty_model,
+    'unicommerce': unicommerce_loyalty_model,
+    'convertway': convertway_loyalty_model
 }
+
 
 @app.get("/loyalty-score")
 def get_loyalty_score_by_integration(

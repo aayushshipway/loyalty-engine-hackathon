@@ -3,6 +3,31 @@ const pool = require('./../utils/db');
 const { Buffer } = require('buffer');
 const axios = require('axios');
 
+const os = require('os');
+
+const isLocal = () => {
+  const hostname = os.hostname().toLowerCase();
+  const localIndicators = ['localhost', 'local', '127.0.0.1'];
+
+  // Check if hostname is obviously local
+  if (localIndicators.some(local => hostname.includes(local))) return true;
+
+  // Check all network interfaces
+  const interfaces = os.networkInterfaces();
+  for (const iface of Object.values(interfaces)) {
+    for (const addr of iface || []) {
+      if (addr.family === 'IPv4' && addr.address.startsWith('127.')) return true;
+      if (addr.family === 'IPv4' && addr.address.startsWith('192.168.')) return true;
+    }
+  }
+
+  return false;
+};
+
+const AIML_API_FINAL_URL = isLocal()
+  ? process.env.AIML_API_URL
+  : process.env.AIML_API_URL_REMOTE;
+
 const login = async (req, res) => {
     try {
         const { email, password, type } = req.body || {};
@@ -85,7 +110,7 @@ const getShipwayLoyalty = async (req, res) => {
             });
         };
         // Step 3: No synced data found – hit the scoring API
-        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score?email=${email}&platform=shipway`;
+        const scoreApiUrl = `${AIML_API_FINAL_URL}/loyalty-score?email=${email}&platform=shipway`;
         const scoringResponse = await axios.get(scoreApiUrl, {
           params: { email } // Correct way to pass query parameters
         });
@@ -147,7 +172,7 @@ const getConvertwayLoyalty = async (req, res) => {
                 churn_rate_convertway: dataResult[0].churn_rate_convertway,
             });
         };
-        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score?email=${email}&platform=convertway`;
+        const scoreApiUrl = `${AIML_API_FINAL_URL}/loyalty-score?email=${email}&platform=convertway`;
         const scoringResponse = await axios.get(scoreApiUrl, {
           params: { email } // Correct way to pass query parameters
         });
@@ -211,7 +236,7 @@ const getUnicommerceLoyalty = async (req, res) => {
                 churn_rate_unicommerce: dataResult[0].churn_rate_unicommerce,
             });
         };
-        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score?email=${email}&platform=unicommerce`;
+        const scoreApiUrl = `${AIML_API_FINAL_URL}/loyalty-score?email=${email}&platform=unicommerce`;
         const scoringResponse = await axios.get(scoreApiUrl, {
           params: { email } // Correct way to pass query parameters
         });
@@ -275,7 +300,7 @@ const getGrandLoyalty = async (req, res) => {
                 grand_badge: dataResult[0].grand_badge,
             });
         };
-        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score/multi-platform`;
+        const scoreApiUrl = `${AIML_API_FINAL_URL}/loyalty-score/multi-platform`;
         const scoringResponse = await axios.get(scoreApiUrl, {
           params: { email } // Correct way to pass query parameters
         });
