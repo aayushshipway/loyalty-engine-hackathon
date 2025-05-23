@@ -2,10 +2,11 @@ import pandas as pd
 import joblib
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
-from sqlalchemy import create_engine
+import pymysql
 from dotenv import load_dotenv
 import os
 from urllib.parse import quote_plus
+from sqlalchemy import create_engine  # ✅ UNCOMMENTED
 
 # Load environment variables
 load_dotenv()
@@ -19,7 +20,7 @@ database = os.getenv("DB_NAME")
 connection_str = f"mysql+pymysql://{user}:{password}@{host}/{database}"
 engine = create_engine(connection_str)
 
-# SQL query to fetch merchant and transactional data
+# SQL query
 query = """
     SELECT
         m.merchant_id,

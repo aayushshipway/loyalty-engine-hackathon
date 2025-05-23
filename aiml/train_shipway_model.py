@@ -19,7 +19,7 @@ password_encoded = quote_plus(password)
 connection_str = f"mysql+pymysql://{user}:{password_encoded}@{host}/{database}"
 engine = create_engine(connection_str)
 
-# Load transactional data
+# Load transactional data including wallet_share
 query_txn = """
     SELECT
         m.merchant_id,
@@ -32,7 +32,8 @@ query_txn = """
         s.undelivered_orders,
         s.services_amount,
         s.delayed_orders,
-        s.average_resolution_tat
+        s.average_resolution_tat,
+        s.wallet_share
     FROM merchants m
     JOIN data_shipway s ON m.merchant_id = s.merchant_id
 """
@@ -69,6 +70,7 @@ merged_df['label'] = (
     0.15 * merged_df['margin_amount'].rank(pct=True) +
     0.10 * merged_df['margin_ratio'].rank(pct=True) +
     0.10 * merged_df['services_amount'].rank(pct=True) +
+    0.10 * df_txn['wallet_share'].rank(pct=True) +
     0.10 * merged_df['merchant_age_days'].rank(pct=True) -
     0.10 * merged_df['undelivered_orders'].rank(pct=True) -
     0.05 * merged_df['complaint_count'].rank(pct=True) +
@@ -104,4 +106,4 @@ model.fit(X, y)
 
 # Save model
 joblib.dump(model, "shipway-model.pkl")
-print("Model trained and saved as shipway-model.pkl")
+print("✅ Model trained and saved as shipway-model.pkl with wallet_share included")

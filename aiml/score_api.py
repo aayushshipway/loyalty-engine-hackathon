@@ -7,28 +7,19 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 
-# Load variables from .env file
+# Load environment variables
 load_dotenv()
-
-# Now you can access them like this:
-db_host = os.getenv("DB_HOST")
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
-db_name = os.getenv("DB_NAME")
-serverport = os.getenv("PORT")
 
 # DB config
 db_config = {
-    'host': db_host,
-    'user': db_user,
-    'password': db_password,
-    'database': db_name,
+    'host': os.getenv("DB_HOST"),
+    'user': os.getenv("DB_USER"),
+    'password': os.getenv("DB_PASSWORD"),
+    'database': os.getenv("DB_NAME"),
     'ssl_disabled': True
 }
 
 app = FastAPI(root_path="/loyalty-engine-hackathon/aiml")
-
-# app = FastAPI()
 
 # Load trained models
 shipway_loyalty_model = joblib.load("shipway-model.pkl")
@@ -100,10 +91,10 @@ def get_loyalty_score_by_integration(
             ORDER BY s.till_date DESC LIMIT 1
         """, conn, params=(email,))
 
-
         if df.empty:
             raise HTTPException(status_code=404, detail="No data found for platform")
 
+        # Load historical data for derived features
         query_hist = """
             SELECT
                 merchant_id,
@@ -130,17 +121,17 @@ def get_loyalty_score_by_integration(
 
         weighted_score = score * merchant[f'multiplier_{platform}']
 
-        # Prepare DB insert fields
+        # Prepare insert data
         merchant_id = merged_df.at[0, 'merchant_id']
         till_date = pd.to_datetime(merged_df.at[0, 'till_date']).date()
         from_date = till_date.replace(day=1)
 
-        # DB column names
+        # Column names
         loyalty_col = f"loyalty_score_{platform}"
         churn_col = f"churn_rate_{platform}"
         sync_col = f"sync_till_{platform}"
 
-        # Save scores (upsert)
+        # Insert/Update current score
         upsert_query = f"""
             INSERT INTO merchants_scores (
                 merchant_id, {loyalty_col}, {churn_col}, {sync_col}, updated_on
@@ -151,9 +142,9 @@ def get_loyalty_score_by_integration(
                 {sync_col} = NOW(),
                 updated_on = NOW()
         """
-        cursor.execute(upsert_query, (merchant_id, score, churn_rate))
+        cursor.execute(upsert_query, (merchant_id, float(score), float(churn_rate)))
 
-        # Save into history
+        # Insert/Update history
         history_query = f"""
             INSERT INTO merchants_scores_history (
                 merchant_id, from_date, till_date, {loyalty_col}, {churn_col}, added_on
@@ -164,7 +155,7 @@ def get_loyalty_score_by_integration(
                 {churn_col} = VALUES({churn_col}),
                 updated_on = NOW()
         """
-        cursor.execute(history_query, (merchant_id, from_date, till_date, score, churn_rate))
+        cursor.execute(history_query, (merchant_id, from_date, till_date, float(score), float(churn_rate)))
 
         conn.commit()
 
@@ -185,9 +176,7 @@ def get_loyalty_score_by_integration(
 
 
 @app.get("/loyalty-score/multi-platform")
-def get_loyalty_scores_for_all_platforms(
-    email: str = Query(...)
-):
+def get_loyalty_scores_for_all_platforms(email: str = Query(...)):
     platforms = ['shipway', 'unicommerce', 'convertway']
     results = []
 
@@ -195,15 +184,27 @@ def get_loyalty_scores_for_all_platforms(
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
 
+        total_weighted_score = 0
+        platform_count = 0
+
         for platform in platforms:
             cursor.execute(f"""
-                SELECT merchant_id FROM merchants
-                WHERE email = %s AND register_{platform} IS NOT NULL
+                SELECT merchant_id, multiplier_{platform}
+                FROM merchants
+                WHERE email = %s AND is_{platform} = '1'
             """, (email,))
-            if cursor.fetchone():
+            row = cursor.fetchone()
+
+            if row:
                 try:
-                    score = get_loyalty_score_by_integration(email=email, platform=platform)
-                    results.append(score)
+                    score_data = get_loyalty_score_by_integration(email=email, platform=platform)
+                    multiplier = row.get(f"multiplier_{platform}", 1)
+                    weighted_score = score_data['loyalty_score'] * multiplier
+
+                    results.append(score_data)
+                    total_weighted_score += weighted_score
+                    platform_count += 1
+
                 except HTTPException as he:
                     if he.status_code != 404:
                         raise he
@@ -211,17 +212,31 @@ def get_loyalty_scores_for_all_platforms(
         if not results:
             raise HTTPException(status_code=404, detail="Merchant not found on any platform or no data.")
 
+        grand_loyalty_score = round(total_weighted_score / platform_count, 2) if platform_count > 0 else 0
+        grand_badge = None
+        if grand_loyalty_score >= 50:
+            grand_badge = 'platinum'
+        elif grand_loyalty_score >= 20:
+            grand_badge = 'gold'
+        elif grand_loyalty_score >= 10:
+            grand_badge = 'silver'
+
         return {
             "email": email,
-            "platform_scores": results
+            "platform_scores": results,
+            "grand_loyalty_score": grand_loyalty_score,
+            "grand_badge": grand_badge
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
     finally:
-        cursor.close()
-        conn.close()
+        try:
+            cursor.close()
+            conn.close()
+        except:
+            pass
 
 
 if __name__ == "__main__":
-    uvicorn.run("score_api:app", host="127.0.0.1", port=serverport, reload=True)
+    uvicorn.run("score_api:app", host="127.0.0.1", port=int(os.getenv("PORT", 8000)), reload=True)
