@@ -36,3 +36,21 @@
     transform: rotate(360deg);
   }
 }
+
+/* Make sure html and body take full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* Wrapper fills full height and uses flex layout */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content grows to fill available space */
+.app-content {
+  flex: 1;
+}

@@ -25,6 +25,7 @@ function LoginPage() {
                 const { data, type } = response.data;
                 const authData = {
                     id: data.id,
+                    email: data.email,
                     type
                 }; 
 

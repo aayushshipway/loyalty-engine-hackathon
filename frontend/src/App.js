@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import MerchantDashboard from './pages/MerchantDashboard';
+import MerchantShipwayDashboard from './pages/MerchantShipwayDashboard';
 import UserDashboard from './pages/UserDashboard';
 import { getLSWithExpiry } from './helpers';
 import PrivateRoute from './PrivateRoute';
@@ -26,14 +27,16 @@ function Navbar() {
       case 'merchant':
         return (
           <>
-            <NavLink to="/merchant-dashboard" className="nav-link">Merchant Dashboard</NavLink>
-            <NavLink to="/reports" className="nav-link">Reports</NavLink>
+            <NavLink to="/merchant-dashboard" className="nav-link">Dashboard</NavLink>
+            <NavLink to="/merchant-shipway-dashboard" className="nav-link">Shipway</NavLink>
+            <NavLink to="/merchant-convertway-dashboard" className="nav-link">Convertway</NavLink>
+            <NavLink to="/merchant-unicommerce-dashboard" className="nav-link">Unicommerce</NavLink>
           </>
         );
       case 'user':
         return (
           <>
-            <NavLink to="/user-dashboard" className="nav-link">User Dashboard</NavLink>
+            <NavLink to="/user-dashboard" className="nav-link">Dashboard</NavLink>
             <NavLink to="/rewards" className="nav-link">Rewards</NavLink>
           </>
         );
@@ -87,6 +90,30 @@ function App() {
               element={
                 <PrivateRoute requiredType="merchant">
                   <MerchantDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/merchant-shipway-dashboard"
+              element={
+                <PrivateRoute requiredType="merchant">
+                  <MerchantShipwayDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/merchant-convertway-dashboard"
+              element={
+                <PrivateRoute requiredType="merchant">
+                  <MerchantShipwayDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/merchant-unicommerce-dashboard"
+              element={
+                <PrivateRoute requiredType="merchant">
+                  <MerchantShipwayDashboard />
                 </PrivateRoute>
               }
             />
