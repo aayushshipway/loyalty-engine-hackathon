@@ -103,13 +103,13 @@ const MerchantDashboard = () => {
       <div className="dashboard-grid">
         <div className="card stat-card highlight-card">
           <h5>Realtime Grand Loyalty Score</h5>
-         <p className={isLoadingGrandStats ? '' : 'grand-loyalty-score'}>
+         <p className={isLoadingGrandStats ? 'text-center' : 'grand-loyalty-score'}>
           {isLoadingGrandStats ? 'Loading...' : grandStats.grandScore}
         </p>
         </div>
         <div className="card stat-card badge-card">
           <center><h5>Realtime Performance Badge</h5></center>
-          <p className={`badge-text badge-${grandStats.grandBadge.toLowerCase()}`}>
+          <p className={isLoadingGrandStats ? 'text-center' : `badge-text badge-${grandStats.grandBadge.toLowerCase()}`}>
             {isLoadingGrandStats ? 'Loading...' : grandStats.grandBadge}
           </p>
         </div>

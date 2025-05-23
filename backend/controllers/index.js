@@ -93,10 +93,8 @@ const getShipwayLoyalty = async (req, res) => {
         if (!scoringResponse) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
-
-        const loyalty_score_shipway = scoringResponse.loyalty_score;
-        const churn_rate_shipway = scoringResponse.merchant_churn_rate;
-
+        const loyalty_score_shipway = scoringResponse.loyalty_score || scoringResponse.data.loyalty_score;
+        const churn_rate_shipway = scoringResponse.merchant_churn_rate || scoringResponse.data.merchant_churn_rate;
         return res.json({
             success: true,
             source: 'realtime',
@@ -158,8 +156,8 @@ const getConvertwayLoyalty = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const loyalty_score_convertway = scoringResponse.loyalty_score;
-        const churn_rate_convertway = scoringResponse.merchant_churn_rate;
+        const loyalty_score_convertway = scoringResponse.loyalty_score || scoringResponse.data.loyalty_score;
+        const churn_rate_convertway = scoringResponse.merchant_churn_rate || scoringResponse.data.merchant_churn_rate;
 
         return res.json({
             success: true,
@@ -222,8 +220,8 @@ const getUnicommerceLoyalty = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const loyalty_score_unicommerce = scoringResponse.loyalty_score;
-        const churn_rate_unicommerce = scoringResponse.merchant_churn_rate;
+        const loyalty_score_unicommerce = scoringResponse.loyalty_score || scoringResponse.data.loyalty_score;
+        const churn_rate_unicommerce = scoringResponse.merchant_churn_rate || scoringResponse.data.merchant_churn_rate;
 
         return res.json({
             success: true,

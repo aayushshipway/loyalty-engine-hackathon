@@ -35,7 +35,7 @@ function MerchantUnicommerceDashboard() {
             if (data.success) {
                 setLoyaltyScore(data.loyalty_score_unicommerce);
             } else {
-                setError('Failed to load unicommerce scores.');
+                setError('No Unicommerce Score found.');
             }
         } catch (err) {
             setError('Server error while loading scores.');

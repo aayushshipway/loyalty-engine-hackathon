@@ -36,7 +36,7 @@ function MerchantConvertwayDashboard() {
       if (data.success) {
         setLoyaltyScore(data.loyalty_score_convertway);
       } else {
-        setError('Failed to load convertway scores.');
+        setError('No Convertway Score found.');
       }
     } catch (err) {
       setError('Server error while loading scores.');
