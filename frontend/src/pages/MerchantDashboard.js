@@ -102,13 +102,13 @@ const MerchantDashboard = () => {
 
       <div className="dashboard-grid">
         <div className="card stat-card highlight-card">
-          <h5>Grand Loyalty Score</h5>
+          <h5>Realtime Grand Loyalty Score</h5>
          <p className={isLoadingGrandStats ? '' : 'grand-loyalty-score'}>
           {isLoadingGrandStats ? 'Loading...' : grandStats.grandScore}
         </p>
         </div>
         <div className="card stat-card badge-card">
-          <h5>Badge Awarded</h5>
+          <center><h5>Realtime Performance Badge</h5></center>
           <p className={`badge-text badge-${grandStats.grandBadge.toLowerCase()}`}>
             {isLoadingGrandStats ? 'Loading...' : grandStats.grandBadge}
           </p>
@@ -116,7 +116,7 @@ const MerchantDashboard = () => {
       </div>
 
       <div className="card mt-4 p-4">
-        <h5 className="mb-3">Month-wise Grand Score</h5>
+        <h5 className="mb-3">Month on Month Grand Score</h5>
         {isLoadingHistory ? (
           <p>Loading history...</p>
         ) : (
