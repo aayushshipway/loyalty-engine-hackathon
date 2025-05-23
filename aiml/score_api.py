@@ -7,22 +7,15 @@ import uvicorn
 import os
 from dotenv import load_dotenv
 
-# Load variables from .env file
+# Load environment variables
 load_dotenv()
-
-# Now you can access them like this:
-db_host = os.getenv("DB_HOST")
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
-db_name = os.getenv("DB_NAME")
-serverport = os.getenv("PORT")
 
 # DB config
 db_config = {
-    'host': db_host,
-    'user': db_user,
-    'password': db_password,
-    'database': db_name,
+    'host': os.getenv("DB_HOST"),
+    'user': os.getenv("DB_USER"),
+    'password': os.getenv("DB_PASSWORD"),
+    'database': os.getenv("DB_NAME"),
     'ssl_disabled': True
 }
 
@@ -165,15 +158,27 @@ def get_loyalty_scores_for_all_platforms(
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
 
+        total_weighted_score = 0
+        platform_count = 0
+
         for platform in platforms:
             cursor.execute(f"""
-                SELECT merchant_id FROM merchants
-                WHERE email = %s AND register_{platform} IS NOT NULL
+                SELECT merchant_id, multiplier_{platform} FROM merchants
+                WHERE email = %s AND is_{platform} = '1'
             """, (email,))
-            if cursor.fetchone():
+            row = cursor.fetchone()
+
+            if row:
                 try:
-                    score = get_loyalty_score_by_integration(email=email, platform=platform)
-                    results.append(score)
+                    score_data = get_loyalty_score_by_integration(email=email, platform=platform)
+                    multiplier = row.get(f"multiplier_{platform}", 1)
+                    
+                    # Multiply score by the multiplier
+                    weighted_score = score_data['loyalty_score'] * multiplier
+                    results.append(score_data)
+                    total_weighted_score += weighted_score
+                    platform_count += 1
+
                 except HTTPException as he:
                     if he.status_code != 404:
                         raise he
@@ -181,17 +186,34 @@ def get_loyalty_scores_for_all_platforms(
         if not results:
             raise HTTPException(status_code=404, detail="Merchant not found on any platform or no data.")
 
+        grand_loyalty_score = round(total_weighted_score / platform_count, 2) if platform_count > 0 else 0
+        grand_badge = None
+
+        if grand_loyalty_score >= 50:
+            grand_badge = 'platinum'
+        elif grand_loyalty_score >= 20:
+            grand_badge = 'gold'
+        elif grand_loyalty_score >= 10:
+            grand_badge = 'silver'
+        else:
+            grand_badge = None  # or 'bronze', 'starter', etc., if needed
+
         return {
             "email": email,
-            "platform_scores": results
+            "platform_scores": results,
+            "grand_loyalty_score": grand_loyalty_score,
+            "grand_badge": grand_badge
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
-    finally:
-        cursor.close()
-        conn.close()
 
+    finally:
+        try:
+            cursor.close()
+            conn.close()
+        except:
+            pass
 
 if __name__ == "__main__":
-    uvicorn.run("score_api:app", host="127.0.0.1", port=serverport, reload=True)
+    uvicorn.run("score_api:app", host="127.0.0.1", port=int(os.getenv("PORT", 8000)), reload=True)

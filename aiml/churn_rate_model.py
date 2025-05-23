@@ -2,8 +2,9 @@ import pandas as pd
 import joblib
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
-import mysql.connector
+import pymysql
 from dotenv import load_dotenv
+import os
 
 # Load variables from .env file
 load_dotenv()
@@ -23,7 +24,7 @@ db_config = {
 }
 
 # Connect and fetch data
-conn = mysql.connector.connect(**db_config)
+conn = pymysql.connect(**db_config)
 query = """
     SELECT
         m.merchant_id,

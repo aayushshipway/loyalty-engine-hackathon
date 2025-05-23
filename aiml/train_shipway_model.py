@@ -5,10 +5,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sqlalchemy import create_engine
 import os
 from urllib.parse import quote_plus
-
 from dotenv import load_dotenv
 
-# Load variables from .env file
+# Load environment variables
 load_dotenv()
 
 host = os.getenv("DB_HOST")
@@ -20,7 +19,7 @@ password_encoded = quote_plus(password)
 connection_str = f"mysql+pymysql://{user}:{password_encoded}@{host}/{database}"
 engine = create_engine(connection_str)
 
-# Load transactional data
+# Load transactional data including wallet_share
 query_txn = """
     SELECT
         m.merchant_id,
@@ -33,7 +32,8 @@ query_txn = """
         s.undelivered_orders,
         s.services_amount,
         s.delayed_orders,
-        s.average_resolution_tat
+        s.average_resolution_tat,
+        s.wallet_share
     FROM merchants m
     JOIN data_shipway s ON m.merchant_id = s.merchant_id
 """
@@ -45,23 +45,24 @@ df_txn['merchant_age_days'] = (datetime.now() - df_txn['register_shipway']).dt.d
 df_txn['return_rate'] = df_txn['undelivered_orders'] / df_txn['order_count'].replace(0, 1)
 df_txn['margin_ratio'] = df_txn['margin_amount'] / df_txn['billing_amount'].replace(0, 1)
 
-# Create pseudo-label for loyalty score (without historical features)
+# Create pseudo-label including wallet_share
 df_txn['label'] = (
     0.20 * df_txn['order_count'].rank(pct=True) +
     0.15 * df_txn['margin_amount'].rank(pct=True) +
     0.10 * df_txn['margin_ratio'].rank(pct=True) +
     0.10 * df_txn['services_amount'].rank(pct=True) +
-    0.10 * df_txn['merchant_age_days'].rank(pct=True) -
+    0.10 * df_txn['merchant_age_days'].rank(pct=True) +
+    0.10 * df_txn['wallet_share'].rank(pct=True) -  # New contribution
     0.10 * df_txn['undelivered_orders'].rank(pct=True) -
     0.05 * df_txn['complaint_count'].rank(pct=True)
 ) * 100
 
-# Feature columns (no historical features)
+# Feature columns (now includes wallet_share)
 features = [
     'order_count', 'billing_amount', 'margin_amount', 'complaint_count',
     'returned_orders', 'undelivered_orders', 'services_amount',
     'delayed_orders', 'average_resolution_tat', 'merchant_age_days',
-    'return_rate', 'margin_ratio'
+    'return_rate', 'margin_ratio', 'wallet_share'
 ]
 
 # Prepare training data
@@ -74,4 +75,4 @@ model.fit(X, y)
 
 # Save model
 joblib.dump(model, "shipway-model.pkl")
-print("Model trained and saved as shipway-model.pkl")
+print("✅ Model trained and saved as shipway-model.pkl with wallet_share included")

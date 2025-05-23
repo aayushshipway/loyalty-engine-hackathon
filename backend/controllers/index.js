@@ -270,21 +270,21 @@ const getGrandLoyalty = async (req, res) => {
                 grand_badge: dataResult[0].grand_badge,
             });
         };
-        // Step 3: No synced data found – hit the scoring API
-        const scoreApiUrl = `${process.env.AIML_API_URL}/score-grand`;
-        const scoringResponse = await axios.post(scoreApiUrl, { merchant_id: merchantId });
-
-        if (!scoringResponse.data || !scoringResponse.data.success) {
+        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score/multi-platform`;
+        const scoringResponse = await axios.get(scoreApiUrl, {
+          params: { email } // Correct way to pass query parameters
+        });
+        if (!scoringResponse) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
-
-        const { grand_score } = scoringResponse.data;
-
+        const grand_score = scoringResponse.data.grand_loyalty_score;
+        const grand_badge = scoringResponse.data.grand_badge;
         return res.json({
             success: true,
             source: 'realtime',
             merchantId,
             grand_score,
+            grand_badge
         });
     } catch (err) {
         console.error('Error in getShipwayLoyalty:', err);
