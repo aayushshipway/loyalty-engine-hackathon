@@ -8,6 +8,7 @@ import UserDashboard from './pages/UserDashboard';
 import UserShipwayDashboard from './pages/UserShipwayDashboard';
 import UserConvertwayDashboard from './pages/UserConvertwayDashboard';
 import UserUnicommerceDashboard from './pages/UserUnicommerceDashboard';
+import UpdateMerchantStats from './pages/UpdateMerchantStats';
 import { getLSWithExpiry } from './helpers';
 import PrivateRoute from './PrivateRoute';
 import BlankRedirect from './BlankRedirect';
@@ -45,6 +46,7 @@ function Navbar() {
             <NavLink to="/user-shipway-dashboard" className="nav-link">Shipway</NavLink>
             <NavLink to="/user-convertway-dashboard" className="nav-link">Convertway</NavLink>
             <NavLink to="/user-unicommerce-dashboard" className="nav-link">Unicommerce</NavLink>
+            <NavLink to="/user-update-merchant-stats" className="nav-link">Update Merchant Stats</NavLink>
           </>
         );
       default:
@@ -100,6 +102,7 @@ function App() {
             <Route path="/user-shipway-dashboard" element={<PrivateRoute requiredType="user"><UserShipwayDashboard /></PrivateRoute>} />
             <Route path="/user-convertway-dashboard" element={<PrivateRoute requiredType="user"><UserConvertwayDashboard /></PrivateRoute>} />
             <Route path="/user-unicommerce-dashboard" element={<PrivateRoute requiredType="user"><UserUnicommerceDashboard /></PrivateRoute>} />
+            <Route path="/user-update-merchant-stats" element={<PrivateRoute requiredType="user"><UpdateMerchantStats /></PrivateRoute>} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>

@@ -1,0 +1,50 @@
+.update-stats-page {
+  max-width: 1000px;
+  margin: auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: #e9ecef;
+  color: #333;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: linear-gradient(to right, #4e54c8, #8f94fb);
+  color: #fff;
+  font-weight: 500;
+}
+
+.stats-form label {
+  font-weight: 500;
+}
+
+.stats-form input.form-control {
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+}
+
+.alert {
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background-color: #e6f4ea;
+  color: #256029;
+  border: 1px solid #b6e2c2;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #842029;
+  border: 1px solid #f5c2c7;
+}

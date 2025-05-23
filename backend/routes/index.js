@@ -26,4 +26,8 @@ router.get('/user/shipway-top-merchants', adminController.getTopShipwayLoyalty);
 router.get('/user/convertway-top-merchants', adminController.getTopConvertwayLoyalty);
 router.get('/user/unicommerce-top-merchants', adminController.getTopUnicommerceLoyalty);
 
+router.post('/user/update-shipway-data', adminController.updateShipwayMerchantStats);
+router.post('/user/update-convertway-data', adminController.updateConvertwayMerchantStats);
+router.post('/user/update-unicommerce-data', adminController.updateUnicommerceMerchantStats);
+
 module.exports = router;
