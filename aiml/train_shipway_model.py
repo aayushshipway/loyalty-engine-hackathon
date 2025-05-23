@@ -3,6 +3,7 @@ import joblib
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
 from sqlalchemy import create_engine
+import os
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
