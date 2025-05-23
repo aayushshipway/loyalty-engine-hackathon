@@ -1,43 +1,31 @@
-.merchant-dashboard {
-  background: #f7f9fc;
-  min-height: 100vh;
+.container {
+  margin: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .dashboard-title {
-  font-weight: 600;
-  color: #333;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.stat-card {
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #e0f7fa, #e1f5fe);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: scale(1.03);
-}
-
-.stat-card h5 {
-  margin-bottom: 0.5rem;
-  color: #007bff;
-  font-size: 1.1rem;
-}
-
-.stat-card p {
-  font-size: 1.6rem;
+  font-size: 26px;
   font-weight: bold;
   color: #333;
+  text-align: center;
+  animation: fadeInDown 0.5s ease-in-out;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: scale(1.01);
+}
+
+.scroll-table {
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .merchant-table {
@@ -47,11 +35,92 @@
 
 .merchant-table th,
 .merchant-table td {
-  border-bottom: 1px solid #ddd;
   padding: 10px;
+  border-bottom: 1px solid #eee;
   text-align: left;
 }
 
-.merchant-table th {
-  background-color: #f8f9fa;
+.score-bar {
+  display: flex;
+  align-items: center;
+  height: 12px;
+  background: #f2f2f2;
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+}
+
+.score-fill {
+  height: 100%;
+  background: #82ca9d;
+  transition: width 0.5s ease-in-out;
+}
+
+.score-bar span {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #333;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: capitalize;
+  display: inline-block;
+}
+
+.chart-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.chart-card {
+  flex: 1 1 33%;
+  min-width: 300px;
+}
+
+/* Animations */
+.animated {
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.fade-in {
+  animation: fadeIn 0.8s forwards;
+}
+
+.slide-in {
+  animation: slideInUp 0.8s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

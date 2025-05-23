@@ -12,6 +12,7 @@ import { getLSWithExpiry } from './helpers';
 import PrivateRoute from './PrivateRoute';
 import BlankRedirect from './BlankRedirect';
 import NotFoundPage from './NotFoundPage';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/Navbar.css';
 import './App.css';
@@ -21,7 +22,6 @@ function Navbar() {
   const authUser = getLSWithExpiry('authKey');
 
   const handleLogout = () => {
-    //localStorage.removeItem('authKey');
     localStorage.clear();
     navigate('/login');
   };
@@ -53,11 +53,11 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg px-3">
-      <NavLink to="/" className="navbar-brand d-flex align-items-center">
-        <img src="" alt="Logo" height="36" className="me-2" />
-        <span>Merchant Loyalty Engine</span>
+    <nav className="navbar navbar-expand-lg">
+      <NavLink to="/" className="navbar-brand">
+        Merchant Loyalty Engine
       </NavLink>
+
 
       {authUser && (
         <>
@@ -75,7 +75,7 @@ function Navbar() {
 
 function Footer() {
   return (
-    <footer className="bg-light text-center text-muted py-3 border-top">
+    <footer className="text-center text-muted py-3 border-top">
       <div className="container">
         <small>&copy; {new Date().getFullYear()} Merchant Loyalty Engine • All rights reserved</small>
       </div>
@@ -88,75 +88,18 @@ function App() {
     <Router>
       <div className="app-wrapper">
         <Navbar />
-        <div className="app-content">
+        <div className="app-content container-fluid">
           <Routes>
-            <Route path="/" element={<BlankRedirect />} /> {/* 👈 Add this */}
+            <Route path="/" element={<BlankRedirect />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/merchant-dashboard"
-              element={
-                <PrivateRoute requiredType="merchant">
-                  <MerchantDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/merchant-shipway-dashboard"
-              element={
-                <PrivateRoute requiredType="merchant">
-                  <MerchantShipwayDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/merchant-convertway-dashboard"
-              element={
-                <PrivateRoute requiredType="merchant">
-                  <MerchantConvertwayDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/merchant-unicommerce-dashboard"
-              element={
-                <PrivateRoute requiredType="merchant">
-                  <MerchantUnicommerceDashboard />
-                </PrivateRoute>
-              }
-            />
-
-            <Route
-              path="/user-dashboard"
-              element={
-                <PrivateRoute requiredType="user">
-                  <UserDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/user-shipway-dashboard"
-              element={
-                <PrivateRoute requiredType="user">
-                  <UserShipwayDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/user-convertway-dashboard"
-              element={
-                <PrivateRoute requiredType="user">
-                  <UserConvertwayDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/user-unicommerce-dashboard"
-              element={
-                <PrivateRoute requiredType="user">
-                  <UserUnicommerceDashboard />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/merchant-dashboard" element={<PrivateRoute requiredType="merchant"><MerchantDashboard /></PrivateRoute>} />
+            <Route path="/merchant-shipway-dashboard" element={<PrivateRoute requiredType="merchant"><MerchantShipwayDashboard /></PrivateRoute>} />
+            <Route path="/merchant-convertway-dashboard" element={<PrivateRoute requiredType="merchant"><MerchantConvertwayDashboard /></PrivateRoute>} />
+            <Route path="/merchant-unicommerce-dashboard" element={<PrivateRoute requiredType="merchant"><MerchantUnicommerceDashboard /></PrivateRoute>} />
+            <Route path="/user-dashboard" element={<PrivateRoute requiredType="user"><UserDashboard /></PrivateRoute>} />
+            <Route path="/user-shipway-dashboard" element={<PrivateRoute requiredType="user"><UserShipwayDashboard /></PrivateRoute>} />
+            <Route path="/user-convertway-dashboard" element={<PrivateRoute requiredType="user"><UserConvertwayDashboard /></PrivateRoute>} />
+            <Route path="/user-unicommerce-dashboard" element={<PrivateRoute requiredType="user"><UserUnicommerceDashboard /></PrivateRoute>} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>

@@ -167,4 +167,127 @@ const getUnicommerceAverageLoyaltyHighChurn = async (req,res) => {
   }
 }
 
-module.exports = { getTopGrandLoyalty, getShipwayHighLoyaltyChurn, getConvertwayHighLoyaltyChurn, getUnicommerceHighLoyaltyChurn, getShipwayAverageLoyaltyHighChurn, getConvertwayAverageLoyaltyHighChurn, getUnicommerceAverageLoyaltyHighChurn };
+const getTopShipwayLoyalty = async (req, res) => {
+  try {
+    // Step 1: Fetch top 50 merchants by loyalty score
+    const [rows] = await pool.query(
+      `SELECT merchant_id, loyalty_score_shipway 
+       FROM merchants_scores 
+       WHERE loyalty_score_shipway IS NOT NULL 
+       ORDER BY loyalty_score_shipway DESC 
+       LIMIT 5`
+    );
+
+    // Step 2: For each merchant, get total orders and billing amount
+    const enrichedMerchants = await Promise.all(
+      rows.map(async (merchant) => {
+        const [summary] = await pool.query(
+          `SELECT 
+             SUM(order_count) AS total_orders, 
+             SUM(billing_amount) AS total_billing 
+           FROM data_shipway 
+           WHERE merchant_id = ?`,
+          [merchant.merchant_id]
+        );
+
+        return {
+          ...merchant,
+          total_orders: summary[0].total_orders || 0,
+          total_billing: summary[0].total_billing || 0,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: enrichedMerchants,
+    });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+const getTopConvertwayLoyalty = async (req, res) => {
+  try {
+    // Step 1: Fetch top 50 merchants by loyalty score
+    const [rows] = await pool.query(
+      `SELECT merchant_id, loyalty_score_convertway
+       FROM merchants_scores 
+       WHERE loyalty_score_convertway IS NOT NULL 
+       ORDER BY loyalty_score_convertway DESC 
+       LIMIT 5`
+    );
+
+    // Step 2: For each merchant, get total orders and billing amount
+    const enrichedMerchants = await Promise.all(
+      rows.map(async (merchant) => {
+        const [summary] = await pool.query(
+          `SELECT 
+             SUM(order_count) AS total_orders, 
+             SUM(billing_amount) AS total_billing 
+           FROM data_convertway
+           WHERE merchant_id = ?`,
+          [merchant.merchant_id]
+        );
+
+        return {
+          ...merchant,
+          total_orders: summary[0].total_orders || 0,
+          total_billing: summary[0].total_billing || 0,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: enrichedMerchants,
+    });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+const getTopUnicommerceLoyalty = async (req, res) => {
+  try {
+    // Step 1: Fetch top 50 merchants by loyalty score
+    const [rows] = await pool.query(
+      `SELECT merchant_id, loyalty_score_unicommerce 
+       FROM merchants_scores 
+       WHERE loyalty_score_unicommerce IS NOT NULL 
+       ORDER BY loyalty_score_unicommerce DESC 
+       LIMIT 5`
+    );
+
+    // Step 2: For each merchant, get total orders and billing amount
+    const enrichedMerchants = await Promise.all(
+      rows.map(async (merchant) => {
+        const [summary] = await pool.query(
+          `SELECT 
+             SUM(order_count) AS total_orders, 
+             SUM(billing_amount) AS total_billing 
+           FROM data_unicommerce 
+           WHERE merchant_id = ?`,
+          [merchant.merchant_id]
+        );
+
+        return {
+          ...merchant,
+          total_orders: summary[0].total_orders || 0,
+          total_billing: summary[0].total_billing || 0,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: enrichedMerchants,
+    });
+  } catch (err) {
+    console.error('Server error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+module.exports = { getTopConvertwayLoyalty, getTopUnicommerceLoyalty, getTopShipwayLoyalty, getTopGrandLoyalty, getShipwayHighLoyaltyChurn, getConvertwayHighLoyaltyChurn, getUnicommerceHighLoyaltyChurn, getShipwayAverageLoyaltyHighChurn, getConvertwayAverageLoyaltyHighChurn, getUnicommerceAverageLoyaltyHighChurn };

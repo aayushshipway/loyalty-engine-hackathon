@@ -103,7 +103,9 @@ const MerchantDashboard = () => {
       <div className="dashboard-grid">
         <div className="card stat-card highlight-card">
           <h5>Grand Loyalty Score</h5>
-          <p>{isLoadingGrandStats ? 'Loading...' : grandStats.grandScore}</p>
+         <p className={isLoadingGrandStats ? '' : 'grand-loyalty-score'}>
+          {isLoadingGrandStats ? 'Loading...' : grandStats.grandScore}
+        </p>
         </div>
         <div className="card stat-card badge-card">
           <h5>Badge Awarded</h5>

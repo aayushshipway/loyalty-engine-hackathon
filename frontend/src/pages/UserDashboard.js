@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import '../css/UserDashboard.css';
 import BACKEND_BASE_URL from '../config';
+import {
+  ResponsiveContainer,
+  ComposedChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+  Bar,
+  LabelList,
+} from 'recharts';
 
 const badgeColors = {
   platinum: '#e5e4e2',
@@ -12,6 +23,9 @@ const badgeColors = {
 const UserDashboard = () => {
   const [merchantName, setMerchantName] = useState('Loading...');
   const [topMerchants, setTopMerchants] = useState([]);
+  const [shipwayTop, setShipwayTop] = useState([]);
+  const [convertwayTop, setConvertwayTop] = useState([]);
+  const [unicommerceTop, setUnicommerceTop] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,16 +33,9 @@ const UserDashboard = () => {
 
     const fetchTopMerchants = async () => {
       try {
-        const res = await fetch(`${BACKEND_BASE_URL}/user/top-grand-loyalty`, {
-          method: 'GET',
-          headers: {
-            'ngrok-skip-browser-warning': 'true',
-          },
-        });
+        const res = await fetch(`${BACKEND_BASE_URL}/user/top-grand-loyalty`);
         const data = await res.json();
-        if (data.success) {
-          setTopMerchants(data.data);
-        }
+        if (data.success) setTopMerchants(data.data);
       } catch (err) {
         console.error('Failed to fetch top merchants:', err);
       } finally {
@@ -36,20 +43,62 @@ const UserDashboard = () => {
       }
     };
 
+    const fetchTopData = async (url, setter) => {
+      try {
+        const res = await fetch(`${BACKEND_BASE_URL}${url}`);
+        const data = await res.json();
+        if (data.success) setter(data.data);
+      } catch (err) {
+        console.error(`Failed to fetch from ${url}`, err);
+      }
+    };
+
     fetchTopMerchants();
+    fetchTopData('/user/shipway-top-merchants', setShipwayTop);
+    fetchTopData('/user/convertway-top-merchants', setConvertwayTop);
+    fetchTopData('/user/unicommerce-top-merchants', setUnicommerceTop);
   }, []);
 
+  const renderTopPerformerChart = (title, data, loyaltyKey, ordersKey, billingKey) => (
+    <div className="chart-card">
+      <div className="card shadow-sm p-3 animated fade-in">
+        <h5 className="mb-3">{title} Top Performers</h5>
+        <ResponsiveContainer width="100%" height={400}>
+          <ComposedChart
+            data={[...data].sort((a, b) => b[loyaltyKey] - a[loyaltyKey])}
+            layout="vertical"
+            margin={{ top: 20, right: 20, left: 80, bottom: 20 }}
+          >
+            <CartesianGrid stroke="#f0f0f0" />
+            <XAxis type="number" />
+            <YAxis dataKey="merchant_id" type="category" />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey={loyaltyKey} barSize={12} fill="#8884d8" name="Loyalty Score">
+              <LabelList dataKey={loyaltyKey} position="right" />
+            </Bar>
+            <Bar dataKey={ordersKey} barSize={12} fill="#82ca9d" name="Total Orders">
+              <LabelList dataKey={ordersKey} position="right" />
+            </Bar>
+            <Bar dataKey={billingKey} barSize={12} fill="#ffc658" name="Total Billing">
+              <LabelList dataKey={billingKey} position="right" formatter={(val) => `₹${val}`} />
+            </Bar>
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="merchant-dashboard container py-4">
+    <div className="merchant-dashboard container py-4 animated slide-in">
       <h2 className="dashboard-title mb-4">{merchantName}</h2>
 
-      <div className="card p-4">
+      <div className="card shadow-sm p-4 mb-4 animated fade-in">
         <h5 className="mb-3">Top 50 Merchants by Grand Loyalty Score</h5>
-
         {isLoading ? (
           <p>Loading merchants...</p>
         ) : (
-          <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+          <div className="scroll-table">
             <table className="merchant-table">
               <thead>
                 <tr>
@@ -63,30 +112,19 @@ const UserDashboard = () => {
                   <tr key={merchant.merchant_id}>
                     <td>{merchant.merchant_id}</td>
                     <td>
-                      <div style={{ position: 'relative', width: '100%' }}>
+                      <div className="score-bar">
                         <div
-                          style={{
-                            height: '10px',
-                            width: `${merchant.grand_score}%`,
-                            backgroundColor: '#82ca9d',
-                            borderRadius: '5px',
-                          }}
+                          className="score-fill"
+                          style={{ width: `${merchant.grand_score}%` }}
                         />
-                        <span style={{ fontSize: '12px', marginLeft: '8px' }}>
-                          {merchant.grand_score}
-                        </span>
+                        <span>{merchant.grand_score}</span>
                       </div>
                     </td>
                     <td>
                       <span
+                        className="badge"
                         style={{
                           backgroundColor: badgeColors[merchant.grand_badge?.toLowerCase()] || '#ccc',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          color: '#000',
-                          fontSize: '12px',
-                          fontWeight: 'bold',
-                          textTransform: 'capitalize',
                         }}
                       >
                         {merchant.grand_badge}
@@ -98,6 +136,12 @@ const UserDashboard = () => {
             </table>
           </div>
         )}
+      </div>
+
+      <div className="chart-row">
+        {renderTopPerformerChart('Shipway', shipwayTop, 'loyalty_score_shipway', 'total_orders', 'total_billing')}
+        {renderTopPerformerChart('Convertway', convertwayTop, 'loyalty_score_convertway', 'total_orders', 'total_billing')}
+        {renderTopPerformerChart('Unicommerce', unicommerceTop, 'loyalty_score_unicommerce', 'total_orders', 'total_billing')}
       </div>
     </div>
   );

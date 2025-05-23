@@ -1,60 +1,89 @@
-.unicommerce-dashboard {
-  max-width: 600px;
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 12px;
+.unicommerce-dashboard.container {
+  max-width: 100%;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #f8f9fd;
 }
 
 .dashboard-title {
-  text-align: center;
-  font-size: 1.8rem;
-  margin-bottom: 2rem;
-  color: #2c3e50;
-}
-
-.card-metrics {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.metric-card {
-  background: #f1f8ff;
-  border-left: 5px solid #007bff;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-.metric-card h4 {
-  margin-bottom: 0.5rem;
-  color: #007bff;
-}
-
-.metric-value {
   font-size: 2rem;
-  font-weight: bold;
-  color: #2c3e50;
+  font-weight: 700;
+  color: #2a2a2a;
+  margin-bottom: 1.5rem;
+}
+
+p.grand-loyalty-score {
+  font-size: 100px !important;
 }
 
 .status-message,
 .error-message {
-  text-align: center;
   font-size: 1.2rem;
-  color: #555;
+  color: #6c757d;
+  padding: 1rem;
+  text-align: center;
 }
 
 .error-message {
-  color: #d9534f;
+  color: #dc3545;
 }
 
-.data-source {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: #888;
+/* Metrics Card Style */
+.card-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.metric-card {
+  flex: 1 1 250px;
+  background: linear-gradient(135deg, #b4d4ff, #ddeeff);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: scale(1.02);
+}
+
+.metric-card h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.metric-value {
+  font-size: 4.5rem;
+  font-weight: 800;
+  color: #004c9b;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  animation: popIn 0.4s ease;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Graph Section */
+.graph-section {
+  margin-top: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+}
+
+.graph-section h5 {
+  font-weight: 600;
+  color: #333;
 }

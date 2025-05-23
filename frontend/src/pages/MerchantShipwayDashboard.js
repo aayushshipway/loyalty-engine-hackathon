@@ -92,7 +92,7 @@ function MerchantShipwayDashboard() {
         <div className="card-metrics mb-4">
           <div className="metric-card">
             <h4>Loyalty Score</h4>
-            <p className="metric-value">{loyaltyScore}</p>
+            <p className="grand-loyalty-score">{loyaltyScore}</p>
           </div>
           {/* You can add more cards here for churnRate etc. */}
         </div>

@@ -22,4 +22,8 @@ router.get('/user/shipway-average-loyalty-high-churn', adminController.getShipwa
 router.get('/user/unicommerce-average-loyalty-high-churn', adminController.getUnicommerceAverageLoyaltyHighChurn);
 router.get('/user/convertway-average-loyalty-high-churn', adminController.getConvertwayAverageLoyaltyHighChurn);
 
+router.get('/user/shipway-top-merchants', adminController.getTopShipwayLoyalty);
+router.get('/user/convertway-top-merchants', adminController.getTopConvertwayLoyalty);
+router.get('/user/unicommerce-top-merchants', adminController.getTopUnicommerceLoyalty);
+
 module.exports = router;
