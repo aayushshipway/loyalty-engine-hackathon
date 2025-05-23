@@ -115,6 +115,8 @@ def get_loyalty_score_by_integration(
         merged_df['return_rate'] = merged_df['undelivered_orders'] / merged_df['order_count'].replace(0, 1)
         merged_df['margin_ratio'] = merged_df['margin_amount'] / merged_df['billing_amount'].replace(0, 1)
 
+        raw_data = merged_df.to_dict(orient="records")
+
         # Predictions
         model = model_map[platform]
         score = round(model.predict(merged_df[LOYALTY_FEATURES])[0],2)
@@ -127,6 +129,8 @@ def get_loyalty_score_by_integration(
         till_date = pd.to_datetime(merged_df.at[0, 'till_date']).date()
         from_date = till_date.replace(day=1)
 
+        # return {"raw_data": merchant_id}
+
         # Column names
         loyalty_col = f"loyalty_score_{platform}"
         churn_col = f"churn_rate_{platform}"
@@ -135,12 +139,11 @@ def get_loyalty_score_by_integration(
         # Insert/Update current score
         upsert_query = f"""
             INSERT INTO merchants_scores (
-                merchant_id, {loyalty_col}, {churn_col}, {sync_col}, updated_on
-            ) VALUES (%s, %s, %s, NOW(), NOW())
+                merchant_id, {loyalty_col}, {churn_col}, updated_on
+            ) VALUES (%s, %s, %s, NOW())
             ON DUPLICATE KEY UPDATE
                 {loyalty_col} = VALUES({loyalty_col}),
                 {churn_col} = VALUES({churn_col}),
-                {sync_col} = NOW(),
                 updated_on = NOW()
         """
         cursor.execute(upsert_query, (merchant_id, float(score), float(churn_rate)))
@@ -221,6 +224,22 @@ def get_loyalty_scores_for_all_platforms(email: str = Query(...)):
             grand_badge = 'gold'
         elif grand_loyalty_score >= 10:
             grand_badge = 'silver'
+
+        # Prepare insert data
+        merchant_id = row.get("merchant_id", 1)
+
+        # Insert/Update current score
+        upsert_query = f"""
+            INSERT INTO merchants_scores (
+                merchant_id, grand_score, grand_badge, updated_on
+            ) VALUES (%s, %s, %s, NOW())
+            ON DUPLICATE KEY UPDATE
+                grand_score = VALUES({grand_loyalty_score}),
+                grand_badge = VALUES({grand_badge}),
+                updated_on = NOW()
+        """
+        cursor.execute(upsert_query, (merchant_id, float(grand_loyalty_score), grand_badge))
+        conn.commit()
 
         return {
             "email": email,
