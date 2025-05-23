@@ -26,13 +26,15 @@ db_config = {
     'ssl_disabled': True
 }
 
-app = FastAPI()
+app = FastAPI(root_path="/loyalty-engine-hackathon/aiml")
+
+# app = FastAPI()
 
 # Load trained models
 shipway_loyalty_model = joblib.load("shipway-model.pkl")
-unicommerce_loyalty_model = joblib.load("unicommerce-model.pkl")
-convertway_loyalty_model = joblib.load("convertway-model.pkl")
-churn_model = joblib.load("merchant_churn_model.pkl")
+# unicommerce_loyalty_model = joblib.load("unicommerce-model.pkl")
+# convertway_loyalty_model = joblib.load("convertway-model.pkl")
+# churn_model = joblib.load("merchant_churn_model.pkl")
 
 # Feature list
 LOYALTY_FEATURES = [
@@ -43,12 +45,12 @@ LOYALTY_FEATURES = [
 
 # Model map
 model_map = {
-    'shipway': shipway_loyalty_model,
-    'unicommerce': unicommerce_loyalty_model,
-    'convertway': convertway_loyalty_model
+    'shipway': shipway_loyalty_model
+    # 'unicommerce': unicommerce_loyalty_model,
+    # 'convertway': convertway_loyalty_model
 }
 
-@app.get("/hackathon/loyalty-score")
+@app.get("/loyalty-score")
 def get_loyalty_score_by_integration(
     email: str = Query(...),
     platform: str = Query(...)
@@ -86,15 +88,15 @@ def get_loyalty_score_by_integration(
             raise HTTPException(status_code=404, detail="No data found for platform")
 
         # Feature engineering
-        df[f'is_{platform}'] = pd.to_datetime(df[f'is_{platform}'])
-        df['merchant_age_days'] = (datetime.now() - df[f'is_{platform}']).dt.days
+        df['from_date'] = pd.to_datetime(df['from_date'])
+        df['merchant_age_days'] = (pd.Timestamp.now() - df['from_date']).dt.days
         df['return_rate'] = df['undelivered_orders'] / df['order_count'].replace(0, 1)
         df['margin_ratio'] = df['margin_amount'] / df['billing_amount'].replace(0, 1)
 
         # Predictions
         model = model_map[platform]
         score = model.predict(df[LOYALTY_FEATURES])[0]
-        churn_rate = churn_model.predict(df[LOYALTY_FEATURES])[0]
+        # churn_rate = churn_model.predict(df[LOYALTY_FEATURES])[0]
 
         weighted_score = score * merchant[f'multiplier_{platform}']
 
@@ -152,7 +154,7 @@ def get_loyalty_score_by_integration(
         conn.close()
 
 
-@app.get("/hackathon/loyalty-score/multi-platform")
+@app.get("/loyalty-score/multi-platform")
 def get_loyalty_scores_for_all_platforms(
     email: str = Query(...)
 ):

@@ -41,21 +41,26 @@ query_txn = """
 df_txn = pd.read_sql(query_txn, engine)
 
 # Load historical score data
-query_hist = """
-    SELECT
-        merchant_id,
-        MAX(till_date) AS latest_date,
-        AVG(loyalty_score_shipway) AS avg_loyalty_score,
-        AVG(churn_rate_shipway) AS avg_churn_rate,
-        MAX(loyalty_score_shipway) - MIN(loyalty_score_shipway) AS loyalty_score_delta,
-        COUNT(*) AS history_months
-    FROM merchants_scores_history
-    GROUP BY merchant_id
-"""
-df_hist = pd.read_sql(query_hist, engine)
+# query_hist = """
+#     SELECT
+#         merchant_id,
+#         MAX(till_date) AS latest_date,
+#         AVG(loyalty_score_shipway) AS avg_loyalty_score,
+#         AVG(churn_rate_shipway) AS avg_churn_rate,
+#         MAX(loyalty_score_shipway) - MIN(loyalty_score_shipway) AS loyalty_score_delta,
+#         COUNT(*) AS history_months
+#     FROM merchants_scores_history
+#     GROUP BY merchant_id
+# """
+# df_hist = pd.read_sql(query_hist, engine)
 
 # Merge transactional data with historical score features
-merged_df = pd.merge(df_txn, df_hist, on="merchant_id", how="left")
+# merged_df = pd.merge(df_txn, df_hist, on="merchant_id", how="left")
+merged_df =df_txn
+
+# print(f"Loaded merchants: {len(df_txn)}")
+# print(f"Merchants with history: {len(df_hist)}")
+# print(f"Merged merchants: {len(merged_df)}")
 
 # Feature engineering
 merged_df['register_shipway'] = pd.to_datetime(merged_df['register_shipway'])
@@ -71,22 +76,21 @@ merged_df['label'] = (
     0.10 * merged_df['services_amount'].rank(pct=True) +
     0.10 * merged_df['merchant_age_days'].rank(pct=True) -
     0.10 * merged_df['undelivered_orders'].rank(pct=True) -
-    0.05 * merged_df['complaint_count'].rank(pct=True) +
-    0.10 * merged_df['avg_loyalty_score'].rank(pct=True) -
-    0.05 * merged_df['avg_churn_rate'].rank(pct=True)
+    0.05 * merged_df['complaint_count'].rank(pct=True)
 ) * 100
+# Drop rows where label could not be computed (to avoid NaNs in y)
+merged_df = merged_df.dropna(subset=['label'])
 
 # Feature columns
 features = [
     'order_count', 'billing_amount', 'margin_amount', 'complaint_count',
     'returned_orders', 'undelivered_orders', 'services_amount',
-    'delayed_orders', 'average_resolution_tat', 'merchant_age_days',
-    'return_rate', 'margin_ratio', 'avg_loyalty_score', 'avg_churn_rate',
-    'loyalty_score_delta', 'history_months'
+    'delayed_orders', 'merchant_age_days',
+    'return_rate', 'margin_ratio'
 ]
 
 # Prepare training data
-X = merged_df[features].fillna(0)
+X = merged_df[features].fillna(0).infer_objects(copy=False)
 y = merged_df['label']
 
 # Train model
