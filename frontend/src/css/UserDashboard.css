@@ -1,0 +1,41 @@
+.merchant-dashboard {
+  background: #f7f9fc;
+  min-height: 100vh;
+}
+
+.dashboard-title {
+  font-weight: 600;
+  color: #333;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #e0f7fa, #e1f5fe);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: scale(1.03);
+}
+
+.stat-card h5 {
+  margin-bottom: 0.5rem;
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+.stat-card p {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #333;
+}
