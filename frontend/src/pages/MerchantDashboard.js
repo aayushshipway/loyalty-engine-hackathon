@@ -24,14 +24,14 @@ const MerchantDashboard = () => {
   const [grandHistory, setGrandHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-  const [merchantId, setMerchantId] = useState(null); // 🆕 ID state
+  const [merchantId, setMerchantId] = useState(null);
 
   useEffect(() => {
     const auth = getLSWithExpiry('authKey');
     if (!auth || !auth.email) return;
 
     setMerchantName('Welcome to Merchant Dashboard');
-    setMerchantId(auth.id); // 🆕 Set ID here
+    setMerchantId(auth.id);
 
     const fetchGrandLoyalty = async () => {
       try {
@@ -53,7 +53,7 @@ const MerchantDashboard = () => {
           });
         }
       } catch (err) {
-        console.error('Failed to fetch grand loyalty:', err);
+        console.error('Error fetching grand loyalty:', err);
       } finally {
         setIsLoadingGrandStats(false);
       }
@@ -103,14 +103,34 @@ const MerchantDashboard = () => {
       <div className="dashboard-grid">
         <div className="card stat-card highlight-card">
           <h5>Realtime Grand Loyalty Score</h5>
-         <p className={isLoadingGrandStats ? 'text-center' : 'grand-loyalty-score'}>
-          {isLoadingGrandStats ? 'Loading...' : grandStats.grandScore}
-        </p>
+          <p className={
+            isLoadingGrandStats
+              ? 'text-center'
+              : (grandStats.grandScore === null || grandStats.grandScore === undefined)
+                ? ''
+                : 'grand-loyalty-score'
+          }>
+            {isLoadingGrandStats
+              ? 'Loading...'
+              : (grandStats.grandScore !== null && grandStats.grandScore !== undefined)
+                ? grandStats.grandScore
+                : 'Not Available'}
+          </p>
         </div>
         <div className="card stat-card badge-card">
           <center><h5>Realtime Performance Badge</h5></center>
-          <p className={isLoadingGrandStats ? 'text-center' : `badge-text badge-${grandStats.grandBadge.toLowerCase()}`}>
-            {isLoadingGrandStats ? 'Loading...' : grandStats.grandBadge}
+          <p className={
+            isLoadingGrandStats
+              ? 'text-center'
+              : grandStats.grandBadge
+                ? `badge-text badge-${grandStats.grandBadge.toLowerCase()}`
+                : ''
+          }>
+            {isLoadingGrandStats
+              ? 'Loading...'
+              : grandStats.grandBadge
+                ? grandStats.grandBadge
+                : 'Not Available'}
           </p>
         </div>
       </div>

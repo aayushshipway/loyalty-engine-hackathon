@@ -279,10 +279,10 @@ const getGrandLoyalty = async (req, res) => {
         const scoringResponse = await axios.get(scoreApiUrl, {
           params: { email } // Correct way to pass query parameters
         });
-        if (!scoringResponse) {
+        if (!scoringResponse || !(scoringResponse.data.grand_loyalty_score && scoringResponse.grand_loyalty_score)) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
-        const grand_score = scoringResponse.data.grand_loyalty_score;
+        const grand_score = scoringResponse.data.grand_loyalty_score || scoringResponse.grand_loyalty_score;
         const grand_badge = scoringResponse.data.grand_badge;
         return res.json({
             success: true,
@@ -292,8 +292,7 @@ const getGrandLoyalty = async (req, res) => {
             grand_badge
         });
     } catch (err) {
-        console.error('Error in getShipwayLoyalty:', err);
-        return res.status(500).json({ success: false, message: 'Internal server error.' });
+        return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
     }
 }
 

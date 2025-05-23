@@ -143,3 +143,11 @@ p.grand-loyalty-score {
     opacity: 1;
   }
 }
+
+.no-data {
+  color: #6c757d !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  display: block;
+}
