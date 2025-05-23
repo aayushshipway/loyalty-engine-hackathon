@@ -116,8 +116,8 @@ def get_loyalty_score_by_integration(
 
         # Predictions
         model = model_map[platform]
-        score = model.predict(merged_df[LOYALTY_FEATURES])[0]
-        churn_rate = churn_model.predict(merged_df[CHURN_FEATURES])[0]
+        score = round(model.predict(merged_df[LOYALTY_FEATURES])[0],2)
+        churn_rate = round(churn_model.predict(merged_df[CHURN_FEATURES])[0],2)
 
         weighted_score = score * merchant[f'multiplier_{platform}']
 

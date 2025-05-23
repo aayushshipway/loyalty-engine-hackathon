@@ -109,8 +109,8 @@ p.grand-loyalty-score {
 }
 
 .badge-platinum {
-  background: linear-gradient(45deg, #e5e4e2, #f5f5f5);
-  color: #2a2a2a;
+  background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+  color: #fff !important;
   box-shadow: 0 4px 12px rgba(229, 228, 226, 0.5);
 }
 

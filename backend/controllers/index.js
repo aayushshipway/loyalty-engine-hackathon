@@ -85,21 +85,24 @@ const getShipwayLoyalty = async (req, res) => {
             });
         };
         // Step 3: No synced data found – hit the scoring API
-        const scoreApiUrl = `${process.env.AIML_API_URL}/score-shipway`;
-        const scoringResponse = await axios.post(scoreApiUrl, { merchant_id: merchantId });
+        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score?email=${email}&platform=shipway`;
+        const scoringResponse = await axios.get(scoreApiUrl, {
+          params: { email } // Correct way to pass query parameters
+        });
 
-        if (!scoringResponse.data || !scoringResponse.data.success) {
+        if (!scoringResponse) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const { loyalty_score_shipway, churn_rate_shipway } = scoringResponse.data;
+        const loyalty_score_shipway = scoringResponse.loyalty_score;
+        const churn_rate_shipway = scoringResponse.merchant_churn_rate;
 
         return res.json({
             success: true,
             source: 'realtime',
             merchantId,
             loyalty_score_shipway,
-            churn_rate_shipway,
+            churn_rate_shipway
         });
     } catch (err) {
         console.error('Error in getShipwayLoyalty:', err);
@@ -146,22 +149,24 @@ const getConvertwayLoyalty = async (req, res) => {
                 churn_rate_convertway: dataResult[0].churn_rate_convertway,
             });
         };
-        // Step 3: No synced data found – hit the scoring API
-        const scoreApiUrl = `${process.env.AIML_API_URL}/score-shipway`;
-        const scoringResponse = await axios.post(scoreApiUrl, { merchant_id: merchantId });
+        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score?email=${email}&platform=convertway`;
+        const scoringResponse = await axios.get(scoreApiUrl, {
+          params: { email } // Correct way to pass query parameters
+        });
 
-        if (!scoringResponse.data || !scoringResponse.data.success) {
+        if (!scoringResponse) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const { loyalty_score_shipway, churn_rate_shipway } = scoringResponse.data;
+        const loyalty_score_convertway = scoringResponse.loyalty_score;
+        const churn_rate_convertway = scoringResponse.merchant_churn_rate;
 
         return res.json({
             success: true,
             source: 'realtime',
             merchantId,
-            loyalty_score_shipway,
-            churn_rate_shipway,
+            loyalty_score_convertway,
+            churn_rate_convertway
         });
     } catch (err) {
         console.error('Error in getConvertwayLoyalty:', err);
@@ -208,22 +213,24 @@ const getUnicommerceLoyalty = async (req, res) => {
                 churn_rate_unicommerce: dataResult[0].churn_rate_unicommerce,
             });
         };
-        // Step 3: No synced data found – hit the scoring API
-        const scoreApiUrl = `${process.env.AIML_API_URL}/score-shipway`;
-        const scoringResponse = await axios.post(scoreApiUrl, { merchant_id: merchantId });
+        const scoreApiUrl = `${process.env.AIML_API_URL}/loyalty-score?email=${email}&platform=unicommerce`;
+        const scoringResponse = await axios.get(scoreApiUrl, {
+          params: { email } // Correct way to pass query parameters
+        });
 
-        if (!scoringResponse.data || !scoringResponse.data.success) {
+        if (!scoringResponse) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const { loyalty_score_unicommerce, churn_rate_unicommerce } = scoringResponse.data;
+        const loyalty_score_unicommerce = scoringResponse.loyalty_score;
+        const churn_rate_unicommerce = scoringResponse.merchant_churn_rate;
 
         return res.json({
             success: true,
             source: 'realtime',
             merchantId,
             loyalty_score_unicommerce,
-            churn_rate_unicommerce,
+            churn_rate_unicommerce
         });
     } catch (err) {
         console.error('Error in getUnicommerceLoyalty:', err);
