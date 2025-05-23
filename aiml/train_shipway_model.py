@@ -39,35 +39,66 @@ query_txn = """
 """
 df_txn = pd.read_sql(query_txn, engine)
 
-# Feature engineering
-df_txn['register_shipway'] = pd.to_datetime(df_txn['register_shipway'])
-df_txn['merchant_age_days'] = (datetime.now() - df_txn['register_shipway']).dt.days
-df_txn['return_rate'] = df_txn['undelivered_orders'] / df_txn['order_count'].replace(0, 1)
-df_txn['margin_ratio'] = df_txn['margin_amount'] / df_txn['billing_amount'].replace(0, 1)
+# Load historical score data
+query_hist = """
+    SELECT
+        merchant_id,
+        MAX(till_date) AS latest_date,
+        AVG(loyalty_score_shipway) AS avg_loyalty_score,
+        AVG(churn_rate_shipway) AS avg_churn_rate,
+        MAX(loyalty_score_shipway) - MIN(loyalty_score_shipway) AS loyalty_score_delta,
+        COUNT(*) AS history_months
+    FROM merchants_scores_history
+    GROUP BY merchant_id
+"""
+df_hist = pd.read_sql(query_hist, engine)
 
-# Create pseudo-label including wallet_share
-df_txn['label'] = (
-    0.20 * df_txn['order_count'].rank(pct=True) +
-    0.15 * df_txn['margin_amount'].rank(pct=True) +
-    0.10 * df_txn['margin_ratio'].rank(pct=True) +
-    0.10 * df_txn['services_amount'].rank(pct=True) +
-    0.10 * df_txn['merchant_age_days'].rank(pct=True) +
-    0.10 * df_txn['wallet_share'].rank(pct=True) -  # New contribution
-    0.10 * df_txn['undelivered_orders'].rank(pct=True) -
-    0.05 * df_txn['complaint_count'].rank(pct=True)
+engine.dispose()
+
+# Merge transactional data with historical score features
+merged_df = pd.merge(df_txn, df_hist, on="merchant_id", how="left")
+
+# Feature engineering
+merged_df['register_shipway'] = pd.to_datetime(merged_df['register_shipway'])
+merged_df['merchant_age_days'] = (datetime.now() - merged_df['register_shipway']).dt.days
+merged_df['return_rate'] = merged_df['undelivered_orders'] / merged_df['order_count'].replace(0, 1)
+merged_df['margin_ratio'] = merged_df['margin_amount'] / merged_df['billing_amount'].replace(0, 1)
+
+# Create pseudo-label for loyalty score
+merged_df['label'] = (
+    0.20 * merged_df['order_count'].rank(pct=True) +
+    0.15 * merged_df['margin_amount'].rank(pct=True) +
+    0.10 * merged_df['margin_ratio'].rank(pct=True) +
+    0.10 * merged_df['services_amount'].rank(pct=True) +
+    0.10 * df_txn['wallet_share'].rank(pct=True) +
+    0.10 * merged_df['merchant_age_days'].rank(pct=True) -
+    0.10 * merged_df['undelivered_orders'].rank(pct=True) -
+    0.05 * merged_df['complaint_count'].rank(pct=True) +
+    0.10 * merged_df['avg_loyalty_score'].rank(pct=True) -
+    0.05 * merged_df['avg_churn_rate'].rank(pct=True)
 ) * 100
 
-# Feature columns (now includes wallet_share)
+# Define features
 features = [
     'order_count', 'billing_amount', 'margin_amount', 'complaint_count',
     'returned_orders', 'undelivered_orders', 'services_amount',
     'delayed_orders', 'average_resolution_tat', 'merchant_age_days',
-    'return_rate', 'margin_ratio', 'wallet_share'
+    'return_rate', 'margin_ratio', 'avg_loyalty_score', 'avg_churn_rate',
+    'loyalty_score_delta', 'history_months'
 ]
 
-# Prepare training data
-X = df_txn[features].fillna(0)
-y = df_txn['label']
+# Fill NaNs in features with 0
+merged_df[features] = merged_df[features].fillna(0)
+
+# Drop rows with NaN in label before training
+train_df = merged_df.dropna(subset=['label'])
+
+X = train_df[features]
+y = train_df['label']
+
+# Optional sanity checks
+assert not X.isnull().values.any(), "NaNs detected in features"
+assert not y.isnull().values.any(), "NaNs detected in label"
 
 # Train model
 model = RandomForestRegressor(n_estimators=500, random_state=5)

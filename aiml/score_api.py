@@ -27,13 +27,29 @@ app = FastAPI(root_path="/loyalty-engine-hackathon/aiml")
 shipway_loyalty_model = joblib.load("shipway-model.pkl")
 # unicommerce_loyalty_model = joblib.load("unicommerce-model.pkl")
 # convertway_loyalty_model = joblib.load("convertway-model.pkl")
-# churn_model = joblib.load("merchant_churn_model.pkl")
+churn_model = joblib.load("merchant_churn_model.pkl")
 
 # Feature list
 LOYALTY_FEATURES = [
     'order_count', 'billing_amount', 'margin_amount', 'complaint_count',
     'returned_orders', 'undelivered_orders', 'services_amount',
-    'merchant_age_days', 'return_rate', 'margin_ratio'
+    'delayed_orders', 'average_resolution_tat', 'merchant_age_days',
+    'return_rate', 'margin_ratio', 'avg_loyalty_score', 'avg_churn_rate',
+    'loyalty_score_delta', 'history_months'
+]
+CHURN_FEATURES = [
+    'delayed_orders',
+    'complaint_count',
+    'average_resolution_tat',
+    'returned_orders',
+    'undelivered_orders',
+    'merchant_age_days',
+    'order_count',
+    'return_rate',
+    'margin_ratio',
+    'billing_amount',
+    'margin_amount',
+    'services_amount'
 ]
 
 # Model map
@@ -77,25 +93,39 @@ def get_loyalty_score_by_integration(
             ORDER BY s.till_date DESC LIMIT 1
         """, conn, params=(email,))
 
+
         if df.empty:
             raise HTTPException(status_code=404, detail="No data found for platform")
 
+        query_hist = """
+            SELECT
+                merchant_id,
+                AVG(loyalty_score_shipway) AS avg_loyalty_score,
+                AVG(churn_rate_shipway) AS avg_churn_rate,
+                MAX(loyalty_score_shipway) - MIN(loyalty_score_shipway) AS loyalty_score_delta,
+                COUNT(*) AS history_months
+            FROM merchants_scores_history
+            GROUP BY merchant_id
+        """
+        df_hist = pd.read_sql(query_hist, conn)
+        merged_df = pd.merge(df, df_hist, on="merchant_id", how="left")
+
         # Feature engineering
-        df['from_date'] = pd.to_datetime(df['from_date'])
-        df['merchant_age_days'] = (pd.Timestamp.now() - df['from_date']).dt.days
-        df['return_rate'] = df['undelivered_orders'] / df['order_count'].replace(0, 1)
-        df['margin_ratio'] = df['margin_amount'] / df['billing_amount'].replace(0, 1)
+        merged_df['from_date'] = pd.to_datetime(merged_df['from_date'])
+        merged_df['merchant_age_days'] = (pd.Timestamp.now() - merged_df['from_date']).dt.days
+        merged_df['return_rate'] = merged_df['undelivered_orders'] / merged_df['order_count'].replace(0, 1)
+        merged_df['margin_ratio'] = merged_df['margin_amount'] / merged_df['billing_amount'].replace(0, 1)
 
         # Predictions
         model = model_map[platform]
-        score = model.predict(df[LOYALTY_FEATURES])[0]
-        # churn_rate = churn_model.predict(df[LOYALTY_FEATURES])[0]
+        score = model.predict(merged_df[LOYALTY_FEATURES])[0]
+        churn_rate = churn_model.predict(merged_df[CHURN_FEATURES])[0]
 
         weighted_score = score * merchant[f'multiplier_{platform}']
 
         # Prepare DB insert fields
-        merchant_id = df.at[0, 'merchant_id']
-        till_date = pd.to_datetime(df.at[0, 'till_date']).date()
+        merchant_id = merged_df.at[0, 'merchant_id']
+        till_date = pd.to_datetime(merged_df.at[0, 'till_date']).date()
         from_date = till_date.replace(day=1)
 
         # DB column names
