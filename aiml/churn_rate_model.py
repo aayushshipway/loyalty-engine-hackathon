@@ -2,28 +2,24 @@ import pandas as pd
 import joblib
 from datetime import datetime
 from sklearn.ensemble import RandomForestRegressor
-import mysql.connector
+from sqlalchemy import create_engine
 from dotenv import load_dotenv
+import os
+from urllib.parse import quote_plus
 
-# Load variables from .env file
+# Load environment variables
 load_dotenv()
 
-# Now you can access them like this:
-db_host = os.getenv("DB_HOST")
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
-db_name = os.getenv("DB_NAME")
+# Database connection
+host = os.getenv("DB_HOST")
+user = os.getenv("DB_USER")
+password = quote_plus(os.getenv("DB_PASSWORD", ""))
+database = os.getenv("DB_NAME")
 
-# DB config
-db_config = {
-    'host': db_host,
-    'user': db_user,
-    'password': db_password,
-    'database': db_name,
-}
+connection_str = f"mysql+pymysql://{user}:{password}@{host}/{database}"
+engine = create_engine(connection_str)
 
-# Connect and fetch data
-conn = mysql.connector.connect(**db_config)
+# SQL query to fetch merchant and transactional data
 query = """
     SELECT
         m.merchant_id,
@@ -40,16 +36,22 @@ query = """
     FROM merchants m
     JOIN data_shipway s ON m.merchant_id = s.merchant_id
 """
-df = pd.read_sql(query, conn)
-conn.close()
+
+# Load data
+df = pd.read_sql(query, engine)
+
+# Cleanup engine
+engine.dispose()
+
+# Convert registration date to datetime
+df['register_shipway'] = pd.to_datetime(df['register_shipway'], errors='coerce')
 
 # Feature engineering
-df['register_shipway'] = pd.to_datetime(df['register_shipway'])
-df['merchant_age_days'] = (datetime.now() - df['register_shipway']).dt.days
+df['merchant_age_days'] = (pd.Timestamp.now() - df['register_shipway']).dt.days
 df['return_rate'] = df['undelivered_orders'] / df['order_count'].replace(0, 1)
 df['margin_ratio'] = df['margin_amount'] / df['billing_amount'].replace(0, 1)
 
-# Create churn risk score (pseudo-label) — higher means higher churn risk
+# Churn risk score (weighted rank-based heuristic)
 df['churn_risk'] = (
     0.30 * df['delayed_orders'].rank(pct=True) +
     0.25 * df['complaint_count'].rank(pct=True) +
@@ -58,7 +60,7 @@ df['churn_risk'] = (
     0.10 * df['undelivered_orders'].rank(pct=True)
 ) * 100
 
-# Features used for prediction
+# Feature set
 features = [
     'delayed_orders',
     'complaint_count',
@@ -68,17 +70,21 @@ features = [
     'merchant_age_days',
     'order_count',
     'return_rate',
-    'margin_ratio'
+    'margin_ratio',
+    'billing_amount',
+    'margin_amount',
+    'services_amount'
 ]
 
-# Drop rows with missing values if any
-df = df.dropna(subset=features + ['churn_risk'])
+# Drop rows with missing data in features or label
+df.dropna(subset=features + ['churn_risk'], inplace=True)
 
+# Prepare training data
 X = df[features]
 y = df['churn_risk']
 
-# Train model
-model = RandomForestRegressor(n_estimators=500, random_state=42)
+# Train Random Forest Regressor
+model = RandomForestRegressor(n_estimators=500, random_state=42, n_jobs=-1)
 model.fit(X, y)
 
 # Save model to disk
