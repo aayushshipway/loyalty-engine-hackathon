@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../css/LoginPage.css';
 import { setLSWithExpiry } from '../helpers';
+import BACKEND_BASE_URL from '../config';
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -16,18 +16,30 @@ function LoginPage() {
         setError('');
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_BASE_URL}/login`, {
-                email,
-                password,
-                type: activeTab,
-            });
-            if (response.data.success) {
-                const { data, type } = response.data;
+            const res = await fetch(
+                `${BACKEND_BASE_URL}/login`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        type: activeTab,
+                    }),
+                }
+            );
+            const data = await res.json();
+            if (data.success) {
+                const type  = data.type;
+                const dataC = data.data;
                 const authData = {
-                    id: data.id,
-                    email: data.email,
+                    id: dataC.id,
+                    email: dataC.email,
                     type
-                }; 
+                };
 
                 setLSWithExpiry('authKey', authData);
                 if (type === 'merchant') {

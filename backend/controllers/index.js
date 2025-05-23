@@ -129,7 +129,7 @@ const getConvertwayLoyalty = async (req, res) => {
 
         // Step 2: Get the latest shipway_data if it's synced
         const [dataResult] = await pool.query(
-            `SELECT loyalty_score_shipway, churn_rate_shipway
+            `SELECT loyalty_score_convertway, churn_rate_convertway
        FROM merchants_scores
        WHERE merchant_id = ? AND sync_till_shipway >= NOW()
        ORDER BY sync_till_shipway DESC
@@ -142,8 +142,8 @@ const getConvertwayLoyalty = async (req, res) => {
                 success: true,
                 source: 'database',
                 merchantId,
-                loyalty_score_shipway: dataResult[0].loyalty_score_shipway,
-                churn_rate_shipway: dataResult[0].churn_rate_shipway,
+                loyalty_score_convertway: dataResult[0].loyalty_score_convertway,
+                churn_rate_convertway: dataResult[0].churn_rate_convertway,
             });
         };
         // Step 3: No synced data found – hit the scoring API
@@ -191,7 +191,7 @@ const getUnicommerceLoyalty = async (req, res) => {
 
         // Step 2: Get the latest shipway_data if it's synced
         const [dataResult] = await pool.query(
-            `SELECT loyalty_score_shipway, churn_rate_shipway
+            `SELECT loyalty_score_unicommerce, churn_rate_unicommerce
        FROM merchants_scores
        WHERE merchant_id = ? AND sync_till_shipway >= NOW()
        ORDER BY sync_till_shipway DESC
@@ -204,8 +204,8 @@ const getUnicommerceLoyalty = async (req, res) => {
                 success: true,
                 source: 'database',
                 merchantId,
-                loyalty_score_shipway: dataResult[0].loyalty_score_shipway,
-                churn_rate_shipway: dataResult[0].churn_rate_shipway,
+                loyalty_score_unicommerce: dataResult[0].loyalty_score_unicommerce,
+                churn_rate_unicommerce: dataResult[0].churn_rate_unicommerce,
             });
         };
         // Step 3: No synced data found – hit the scoring API
@@ -216,14 +216,14 @@ const getUnicommerceLoyalty = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const { loyalty_score_shipway, churn_rate_shipway } = scoringResponse.data;
+        const { loyalty_score_unicommerce, churn_rate_unicommerce } = scoringResponse.data;
 
         return res.json({
             success: true,
             source: 'realtime',
             merchantId,
-            loyalty_score_shipway,
-            churn_rate_shipway,
+            loyalty_score_unicommerce,
+            churn_rate_unicommerce,
         });
     } catch (err) {
         console.error('Error in getUnicommerceLoyalty:', err);
@@ -278,14 +278,13 @@ const getGrandLoyalty = async (req, res) => {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
 
-        const { loyalty_score_shipway, churn_rate_shipway } = scoringResponse.data;
+        const { grand_score } = scoringResponse.data;
 
         return res.json({
             success: true,
             source: 'realtime',
             merchantId,
-            loyalty_score_shipway,
-            churn_rate_shipway,
+            grand_score,
         });
     } catch (err) {
         console.error('Error in getShipwayLoyalty:', err);

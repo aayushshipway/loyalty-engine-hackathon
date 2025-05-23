@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import './../css/MerchantConvertwayDashboard.css'; // 👈 custom styles
 import { getLSWithExpiry } from '../helpers';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import BACKEND_BASE_URL from '../config';
 
 function MerchantConvertwayDashboard() {
   const [loyaltyScore, setLoyaltyScore] = useState(null);
@@ -22,15 +22,19 @@ function MerchantConvertwayDashboard() {
     }
 
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_BASE_URL}/merchant/convertway-loyalty`,
+      const res = await fetch(
+        `${BACKEND_BASE_URL}/merchant/convertway-loyalty?email=${auth.email}`,
         {
-          params: { email: auth.email },
+            method: 'GET',
+            headers: {
+                'ngrok-skip-browser-warning': 'true',
+            },
         }
-      );
+    );
+    const data = await res.json();
 
-      if (response.data.success) {
-        setLoyaltyScore(response.data.loyalty_score_convertway);
+      if (data.success) {
+        setLoyaltyScore(data.loyalty_score_convertway);
       } else {
         setError('Failed to load convertway scores.');
       }
@@ -46,13 +50,19 @@ function MerchantConvertwayDashboard() {
     if (!auth || !auth.email) return;
 
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_BACKEND_BASE_URL}/merchant/convertway-loyalty-history`,
-        { params: { email: auth.email } }
-      );
+      const res = await fetch(
+        `${BACKEND_BASE_URL}/merchant/convertway-loyalty-history?email=${auth.email}`,
+        {
+            method: 'GET',
+            headers: {
+                'ngrok-skip-browser-warning': 'true',
+            },
+        }
+    );
+    const data = await res.json();
 
-      if (res.data.success) {
-        const formatted = res.data.history.map(entry => ({
+      if (data.success) {
+        const formatted = data.history.map(entry => ({
           month: `${entry.month} ${entry.year}`,
           score: entry.loyalty_score_convertway
         }));

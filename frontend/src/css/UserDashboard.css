@@ -39,3 +39,19 @@
   font-weight: bold;
   color: #333;
 }
+
+.merchant-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.merchant-table th,
+.merchant-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.merchant-table th {
+  background-color: #f8f9fa;
+}

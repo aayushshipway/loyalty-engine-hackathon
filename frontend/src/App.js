@@ -5,6 +5,9 @@ import MerchantShipwayDashboard from './pages/MerchantShipwayDashboard';
 import MerchantUnicommerceDashboard from './pages/MerchantUnicommerceDashboard';
 import MerchantConvertwayDashboard from './pages/MerchantConvertwayDashboard';
 import UserDashboard from './pages/UserDashboard';
+import UserShipwayDashboard from './pages/UserShipwayDashboard';
+import UserConvertwayDashboard from './pages/UserConvertwayDashboard';
+import UserUnicommerceDashboard from './pages/UserUnicommerceDashboard';
 import { getLSWithExpiry } from './helpers';
 import PrivateRoute from './PrivateRoute';
 import BlankRedirect from './BlankRedirect';
@@ -39,7 +42,9 @@ function Navbar() {
         return (
           <>
             <NavLink to="/user-dashboard" className="nav-link">Dashboard</NavLink>
-            <NavLink to="/rewards" className="nav-link">Rewards</NavLink>
+            <NavLink to="/user-shipway-dashboard" className="nav-link">Shipway</NavLink>
+            <NavLink to="/user-convertway-dashboard" className="nav-link">Convertway</NavLink>
+            <NavLink to="/user-unicommerce-dashboard" className="nav-link">Unicommerce</NavLink>
           </>
         );
       default:
@@ -125,6 +130,30 @@ function App() {
               element={
                 <PrivateRoute requiredType="user">
                   <UserDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/user-shipway-dashboard"
+              element={
+                <PrivateRoute requiredType="user">
+                  <UserShipwayDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/user-convertway-dashboard"
+              element={
+                <PrivateRoute requiredType="user">
+                  <UserConvertwayDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/user-unicommerce-dashboard"
+              element={
+                <PrivateRoute requiredType="user">
+                  <UserUnicommerceDashboard />
                 </PrivateRoute>
               }
             />

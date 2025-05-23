@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import './../css/MerchantShipwayDashboard.css'; // 👈 custom styles
 import { getLSWithExpiry } from '../helpers';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import BACKEND_BASE_URL from '../config';
 
 function MerchantShipwayDashboard() {
   const [loyaltyScore, setLoyaltyScore] = useState(null);
@@ -22,15 +22,19 @@ function MerchantShipwayDashboard() {
     }
 
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_BASE_URL}/merchant/shipway-loyalty`,
-        {
-          params: { email: auth.email },
-        }
-      );
 
-      if (response.data.success) {
-        setLoyaltyScore(response.data.loyalty_score_shipway);
+        const res = await fetch(
+            `${BACKEND_BASE_URL}/merchant/shipway-loyalty?email=${auth.email}`,
+            {
+                method: 'GET',
+                headers: {
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+        const data = await res.json();
+      if (data.success) {
+        setLoyaltyScore(data.loyalty_score_shipway);
       } else {
         setError('Failed to load shipway scores.');
       }
@@ -46,13 +50,19 @@ function MerchantShipwayDashboard() {
     if (!auth || !auth.email) return;
 
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_BACKEND_BASE_URL}/merchant/shipway-loyalty-history`,
-        { params: { email: auth.email } }
-      );
+      const res = await fetch(
+        `${BACKEND_BASE_URL}/merchant/shipway-loyalty-history?email=${auth.email}`,
+        {
+            method: 'GET',
+            headers: {
+                'ngrok-skip-browser-warning': 'true',
+            },
+        }
+    );
+    const data = await res.json();
 
-      if (res.data.success) {
-        const formatted = res.data.history.map(entry => ({
+      if (data.success) {
+        const formatted = data.history.map(entry => ({
           month: `${entry.month} ${entry.year}`,
           score: entry.loyalty_score_shipway
         }));

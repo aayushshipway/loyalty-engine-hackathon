@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { getLSWithExpiry } from '../helpers';
 import {
   LineChart,
@@ -11,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import '../css/MerchantDashboard.css';
+import BACKEND_BASE_URL from '../config';
 
 const MerchantDashboard = () => {
   const [merchantName, setMerchantName] = useState('Loading...');
@@ -24,23 +24,32 @@ const MerchantDashboard = () => {
   const [grandHistory, setGrandHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
+  const [merchantId, setMerchantId] = useState(null); // 🆕 ID state
+
   useEffect(() => {
-    setMerchantName('Welcome to Merchant Dashboard');
     const auth = getLSWithExpiry('authKey');
     if (!auth || !auth.email) return;
 
+    setMerchantName('Welcome to Merchant Dashboard');
+    setMerchantId(auth.id); // 🆕 Set ID here
+
     const fetchGrandLoyalty = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BACKEND_BASE_URL}/merchant/grand-loyalty`,
-          { params: { email: auth.email } }
+        const res = await fetch(
+          `${BACKEND_BASE_URL}/merchant/grand-loyalty?email=${auth.email}`,
+          {
+            method: 'GET',
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }
         );
-
-        if (response.data.success) {
+        const data = await res.json();
+        if (data.success) {
           setGrandStats({
-            grandScore: response.data.grand_score,
-            grandBadge: response.data.grand_badge,
-            source: response.data.source,
+            grandScore: data.grand_score,
+            grandBadge: data.grand_badge,
+            source: data.source,
           });
         }
       } catch (err) {
@@ -52,13 +61,18 @@ const MerchantDashboard = () => {
 
     const fetchGrandHistory = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BACKEND_BASE_URL}/merchant/grand-loyalty-history`,
-          { params: { email: auth.email } }
+        const res = await fetch(
+          `${BACKEND_BASE_URL}/merchant/grand-loyalty-history?email=${auth.email}`,
+          {
+            method: 'GET',
+            headers: {
+              'ngrok-skip-browser-warning': 'true',
+            },
+          }
         );
-
-        if (response.data.success) {
-          const formatted = response.data.history.map((entry) => ({
+        const data = await res.json();
+        if (data.success) {
+          const formatted = data.history.map((entry) => ({
             month: `${entry.month} ${entry.year}`,
             grand_score: entry.grand_score,
           }));
@@ -77,7 +91,14 @@ const MerchantDashboard = () => {
 
   return (
     <div className="merchant-dashboard container py-4">
-      <h2 className="dashboard-title mb-4">{merchantName}</h2>
+      <div className="d-flex justify-content-between align-items-center">
+        <h2 className="dashboard-title mb-4">{merchantName}</h2>
+        {merchantId && (
+          <div className="merchant-id-text text-muted">
+            <strong>My ID:</strong> {merchantId}
+          </div>
+        )}
+      </div>
 
       <div className="dashboard-grid">
         <div className="card stat-card highlight-card">
@@ -92,7 +113,6 @@ const MerchantDashboard = () => {
         </div>
       </div>
 
-      {/* Chart Section */}
       <div className="card mt-4 p-4">
         <h5 className="mb-3">Month-wise Grand Score</h5>
         {isLoadingHistory ? (
