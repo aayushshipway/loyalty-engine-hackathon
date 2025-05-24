@@ -157,8 +157,8 @@ const getConvertwayLoyalty = async (req, res) => {
         const [dataResult] = await pool.query(
             `SELECT loyalty_score_convertway, churn_rate_convertway
        FROM merchants_scores
-       WHERE merchant_id = ? AND sync_till_shipway >= NOW()
-       ORDER BY sync_till_shipway DESC
+       WHERE merchant_id = ? AND sync_till_convertway >= NOW()
+       ORDER BY sync_till_convertway DESC
        LIMIT 1`,
             [merchantId]
         );
@@ -221,8 +221,8 @@ const getUnicommerceLoyalty = async (req, res) => {
         const [dataResult] = await pool.query(
             `SELECT loyalty_score_unicommerce, churn_rate_unicommerce
        FROM merchants_scores
-       WHERE merchant_id = ? AND sync_till_shipway >= NOW()
-       ORDER BY sync_till_shipway DESC
+       WHERE merchant_id = ? AND sync_till_unicommerce >= NOW()
+       ORDER BY sync_till_unicommerce DESC
        LIMIT 1`,
             [merchantId]
         );
