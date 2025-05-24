@@ -237,6 +237,22 @@ def get_loyalty_scores_for_all_platforms(email: str = Query(...)):
                 updated_on = NOW()
         """
         cursor.execute(upsert_query, (merchant_id, float(grand_loyalty_score), grand_badge))
+
+        till_date = "2025-05-31"
+        from_date = "2025-05-01"
+        # Insert/Update history
+        history_query = f"""
+            INSERT INTO merchants_scores_history (
+                merchant_id, from_date, till_date, grand_score, grand_badge, added_on
+            ) VALUES (%s, %s, %s, %s, %s, NOW())
+            ON DUPLICATE KEY UPDATE
+                till_date = VALUES(till_date),
+                grand_score = VALUES(grand_score),
+                grand_badge = VALUES(grand_badge),
+                updated_on = NOW()
+        """
+        cursor.execute(history_query, (merchant_id, from_date, till_date, float(grand_loyalty_score), grand_badge))
+
         conn.commit()
 
         return {
