@@ -66,16 +66,16 @@ merged_df['margin_ratio'] = merged_df['margin_amount'] / merged_df['billing_amou
 
 # Create pseudo-label for loyalty score
 merged_df['label'] = (
-    0.20 * merged_df['order_count'].rank(pct=True) +
-    0.15 * merged_df['margin_amount'].rank(pct=True) +
-    0.10 * merged_df['margin_ratio'].rank(pct=True) +
-    0.10 * merged_df['services_amount'].rank(pct=True) +
-    0.10 * merged_df['wallet_share'].rank(pct=True) +
-    0.10 * merged_df['merchant_age_days'].rank(pct=True) -
-    0.10 * merged_df['undelivered_orders'].rank(pct=True) -
-    0.05 * merged_df['complaint_count'].rank(pct=True) +
-    0.10 * merged_df['avg_loyalty_score'].rank(pct=True) -
-    0.05 * merged_df['avg_churn_rate'].rank(pct=True)
+    0.25 * merged_df['order_count'].rank(pct=True) +
+    0.20 * merged_df['margin_amount'].rank(pct=True) +
+    0.15 * merged_df['wallet_share'].rank(pct=True) +
+    0.15 * merged_df['merchant_age_days'].rank(pct=True) +
+    0.05 * merged_df['margin_ratio'].rank(pct=True) +
+    0.05 * merged_df['services_amount'].rank(pct=True) +
+    0.05 * merged_df['avg_loyalty_score'].rank(pct=True) -
+    0.05 * merged_df['undelivered_orders'].rank(pct=True) -
+    0.03 * merged_df['complaint_count'].rank(pct=True) -
+    0.02 * merged_df['avg_churn_rate'].rank(pct=True)
 ) * 100
 
 # Define features
