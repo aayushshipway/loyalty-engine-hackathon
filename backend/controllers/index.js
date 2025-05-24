@@ -304,7 +304,7 @@ const getGrandLoyalty = async (req, res) => {
         const scoringResponse = await axios.get(scoreApiUrl, {
           params: { email } // Correct way to pass query parameters
         });
-        if (!scoringResponse || !(scoringResponse.data.grand_loyalty_score && scoringResponse.grand_loyalty_score)) {
+        if (!scoringResponse || (!scoringResponse.data.grand_loyalty_score && !scoringResponse.grand_loyalty_score)) {
             return res.status(500).json({ success: false, message: 'Failed to fetch scoring data.' });
         }
         const grand_score = scoringResponse.data.grand_loyalty_score || scoringResponse.grand_loyalty_score;
