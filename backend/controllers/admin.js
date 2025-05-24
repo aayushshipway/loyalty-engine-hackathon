@@ -7,7 +7,7 @@ const getTopGrandLoyalty = async (req, res) => {
         FROM merchants_scores 
         WHERE grand_score IS NOT NULL 
         ORDER BY grand_score DESC 
-        LIMIT 50`
+        LIMIT 10`
         );
 
         res.json({
