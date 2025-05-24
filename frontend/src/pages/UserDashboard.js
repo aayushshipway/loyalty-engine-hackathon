@@ -94,7 +94,7 @@ const UserDashboard = () => {
       <h2 className="dashboard-title mb-4">{merchantName}</h2>
 
       <div className="card shadow-sm p-4 mb-4 animated fade-in">
-        <h5 className="mb-3">Top 50 Merchants by Grand Loyalty Score</h5>
+        <h5 className="mb-3">Top 10 Merchants by Grand Loyalty Score</h5>
         {isLoading ? (
           <p>Loading merchants...</p>
         ) : (

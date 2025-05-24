@@ -33,7 +33,7 @@ LOYALTY_FEATURES = [
     'returned_orders', 'undelivered_orders', 'services_amount',
     'delayed_orders', 'average_resolution_tat', 'merchant_age_days',
     'return_rate', 'margin_ratio', 'avg_loyalty_score', 'avg_churn_rate',
-    'loyalty_score_delta', 'history_months'
+    'loyalty_score_delta', 'history_months', 'wallet_share'
 ]
 CHURN_FEATURES = [
     'delayed_orders',
