@@ -18,8 +18,8 @@ import shipwayLogo from '../shipway.webp';
 import convertwayLogo from '../convertway.webp';
 
 const badgeColors = {
-  platinum: '#e5e4e2',
-  gold: '#FFD700',
+  platinum: '#000080',
+  gold: '#B8860B',
   silver: '#C0C0C0',
   bronze: '#cd7f32',
 };
@@ -73,7 +73,7 @@ const UserDashboard = () => {
     <div className="chart-card">
       <div className="card shadow-sm p-3 animated fade-in text-center">
         <img src={logo} alt={`${title} logo`} style={{ width: '20%', marginBottom: 10, marginLeft: '40%' }} />
-        <h5 className="mb-3">{title} <b>Top Performers</b></h5>
+        <h5 className="mb-3"><b>Top 5 Performers</b></h5>
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart
             data={[...data].sort((a, b) => b[loyaltyKey] - a[loyaltyKey])}
@@ -105,7 +105,7 @@ const UserDashboard = () => {
       <h2 className="dashboard-title mb-4">{merchantName}</h2>
 
       <div className="card shadow-sm p-4 mb-4 animated fade-in">
-        <h5 className="mb-3">Top 10 Merchants by Grand Loyalty Score</h5>
+        <h5 className="mb-3"><b>Top 10 Merchants by Grand Loyalty Score</b></h5>
         {isLoading ? (
           <p>Loading merchants...</p>
         ) : (
