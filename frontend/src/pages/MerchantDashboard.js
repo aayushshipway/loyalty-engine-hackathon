@@ -64,6 +64,7 @@ const MerchantDashboard = () => {
             grandBadge: data.grand_badge,
             source: data.source,
           });
+          fetchGrandHistory();
         }
       } catch (err) {
         console.error('Error fetching grand loyalty:', err);
