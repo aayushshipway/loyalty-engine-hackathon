@@ -26,6 +26,19 @@ const MerchantDashboard = () => {
 
   const [merchantId, setMerchantId] = useState(null);
 
+  const getBadgeIcon = (badge) => {
+    switch (badge.toLowerCase()) {
+      case 'platinum':
+        return '🏆'; // Trophy
+      case 'gold':
+        return '🥇'; // Gold Medal
+      case 'silver':
+        return '🥈'; // Silver Medal
+      default:
+        return '';
+    }
+  };
+
   useEffect(() => {
     const auth = getLSWithExpiry('authKey');
     if (!auth || !auth.email) return;
@@ -129,7 +142,7 @@ const MerchantDashboard = () => {
             {isLoadingGrandStats
               ? 'Loading...'
               : grandStats.grandBadge
-                ? grandStats.grandBadge
+                ? `${grandStats.grandBadge} ${getBadgeIcon(grandStats.grandBadge)}`
                 : 'Not Available'}
           </p>
         </div>

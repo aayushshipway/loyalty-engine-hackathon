@@ -35,8 +35,8 @@ function Navbar() {
           <>
             <NavLink to="/merchant-dashboard" className="nav-link">Dashboard</NavLink>
             <NavLink to="/merchant-shipway-dashboard" className="nav-link">Shipway</NavLink>
-            <NavLink to="/merchant-convertway-dashboard" className="nav-link">Convertway</NavLink>
             <NavLink to="/merchant-unicommerce-dashboard" className="nav-link">Unicommerce</NavLink>
+            <NavLink to="/merchant-convertway-dashboard" className="nav-link">Convertway</NavLink>
           </>
         );
       case 'user':
@@ -44,8 +44,8 @@ function Navbar() {
           <>
             <NavLink to="/user-dashboard" className="nav-link">Dashboard</NavLink>
             <NavLink to="/user-shipway-dashboard" className="nav-link">Shipway</NavLink>
-            <NavLink to="/user-convertway-dashboard" className="nav-link">Convertway</NavLink>
             <NavLink to="/user-unicommerce-dashboard" className="nav-link">Unicommerce</NavLink>
+            <NavLink to="/user-convertway-dashboard" className="nav-link">Convertway</NavLink>
             <NavLink to="/user-update-merchant-stats" className="nav-link">Update Merchant Stats</NavLink>
           </>
         );
@@ -57,7 +57,7 @@ function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg">
       <NavLink to="/" className="navbar-brand">
-        Merchant Loyalty Engine
+        <b>UniLoyal</b>&nbsp;&nbsp;&nbsp;
       </NavLink>
 
 

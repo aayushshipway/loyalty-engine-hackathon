@@ -13,6 +13,10 @@ import {
   LabelList,
 } from 'recharts';
 
+import unicommerceLogo from '../unicommerce.png';
+import shipwayLogo from '../shipway.webp';
+import convertwayLogo from '../convertway.webp';
+
 const badgeColors = {
   platinum: '#e5e4e2',
   gold: '#FFD700',
@@ -33,7 +37,10 @@ const UserDashboard = () => {
 
     const fetchTopMerchants = async () => {
       try {
-        const res = await fetch(`${BACKEND_BASE_URL}/user/top-grand-loyalty`);
+        const res = await fetch(`${BACKEND_BASE_URL}/user/top-grand-loyalty`,{headers:{
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true',
+                    }});
         const data = await res.json();
         if (data.success) setTopMerchants(data.data);
       } catch (err) {
@@ -45,7 +52,10 @@ const UserDashboard = () => {
 
     const fetchTopData = async (url, setter) => {
       try {
-        const res = await fetch(`${BACKEND_BASE_URL}${url}`);
+        const res = await fetch(`${BACKEND_BASE_URL}${url}`,{headers:{
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true',
+                    }});
         const data = await res.json();
         if (data.success) setter(data.data);
       } catch (err) {
@@ -59,10 +69,11 @@ const UserDashboard = () => {
     fetchTopData('/user/unicommerce-top-merchants', setUnicommerceTop);
   }, []);
 
-  const renderTopPerformerChart = (title, data, loyaltyKey, ordersKey, billingKey) => (
+  const renderTopPerformerChart = (title, data, loyaltyKey, ordersKey, billingKey, logo) => (
     <div className="chart-card">
-      <div className="card shadow-sm p-3 animated fade-in">
-        <h5 className="mb-3">{title} Top Performers</h5>
+      <div className="card shadow-sm p-3 animated fade-in text-center">
+        <img src={logo} alt={`${title} logo`} style={{ width: '20%', marginBottom: 10, marginLeft: '40%' }} />
+        <h5 className="mb-3">{title} <b>Top Performers</b></h5>
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart
             data={[...data].sort((a, b) => b[loyaltyKey] - a[loyaltyKey])}
@@ -124,7 +135,8 @@ const UserDashboard = () => {
                       <span
                         className="badge"
                         style={{
-                          backgroundColor: badgeColors[merchant.grand_badge?.toLowerCase()] || '#ccc',
+                          backgroundColor:
+                            badgeColors[merchant.grand_badge?.toLowerCase()] || '#ccc',
                         }}
                       >
                         {merchant.grand_badge}
@@ -139,9 +151,9 @@ const UserDashboard = () => {
       </div>
 
       <div className="chart-row">
-        {renderTopPerformerChart('Shipway', shipwayTop, 'loyalty_score_shipway', 'total_orders', 'total_billing')}
-        {renderTopPerformerChart('Convertway', convertwayTop, 'loyalty_score_convertway', 'total_orders', 'total_billing')}
-        {renderTopPerformerChart('Unicommerce', unicommerceTop, 'loyalty_score_unicommerce', 'total_orders', 'total_billing')}
+        {renderTopPerformerChart('Shipway', shipwayTop, 'loyalty_score_shipway', 'total_orders', 'total_billing', shipwayLogo)}
+        {renderTopPerformerChart('Convertway', convertwayTop, 'loyalty_score_convertway', 'total_orders', 'total_billing', convertwayLogo)}
+        {renderTopPerformerChart('Unicommerce', unicommerceTop, 'loyalty_score_unicommerce', 'total_orders', 'total_billing', unicommerceLogo)}
       </div>
     </div>
   );

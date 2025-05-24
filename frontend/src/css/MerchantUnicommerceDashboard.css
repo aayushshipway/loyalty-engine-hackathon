@@ -4,6 +4,17 @@
   background: #f8f9fd;
 }
 
+.header-with-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centers horizontally */
+  gap: 10px; /* space between title and logo */
+  margin-bottom: 1rem;
+}
+.header-with-logo img {
+  margin-top:-30px !important;
+}
+
 .dashboard-title {
   font-size: 2rem;
   font-weight: 700;

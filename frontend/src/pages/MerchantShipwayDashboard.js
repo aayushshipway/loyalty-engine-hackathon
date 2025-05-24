@@ -5,6 +5,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import BACKEND_BASE_URL from '../config';
+import shipwayLogo from '../shipway.webp'; // add this line
+
 
 function MerchantShipwayDashboard() {
   const [loyaltyScore, setLoyaltyScore] = useState(null);
@@ -23,16 +25,16 @@ function MerchantShipwayDashboard() {
 
     try {
 
-        const res = await fetch(
-            `${BACKEND_BASE_URL}/merchant/shipway-loyalty?email=${auth.email}`,
-            {
-                method: 'GET',
-                headers: {
-                    'ngrok-skip-browser-warning': 'true',
-                },
-            }
-        );
-        const data = await res.json();
+      const res = await fetch(
+        `${BACKEND_BASE_URL}/merchant/shipway-loyalty?email=${auth.email}`,
+        {
+          method: 'GET',
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+        }
+      );
+      const data = await res.json();
       if (data.success) {
         setLoyaltyScore(data.loyalty_score_shipway);
       } else {
@@ -53,13 +55,13 @@ function MerchantShipwayDashboard() {
       const res = await fetch(
         `${BACKEND_BASE_URL}/merchant/shipway-loyalty-history?email=${auth.email}`,
         {
-            method: 'GET',
-            headers: {
-                'ngrok-skip-browser-warning': 'true',
-            },
+          method: 'GET',
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
         }
-    );
-    const data = await res.json();
+      );
+      const data = await res.json();
 
       if (data.success) {
         const formatted = data.history.map(entry => ({
@@ -82,7 +84,9 @@ function MerchantShipwayDashboard() {
 
   return (
     <div className="shipway-dashboard container">
-      <h2 className="dashboard-title">My Shipway Loyalty</h2>
+      <div className="d-flex align-items-center mb-3 header-with-logo">
+        <img src={shipwayLogo} alt="Shipway Logo" style={{ width: '200px' }} />
+      </div>
 
       {loading ? (
         <div className="status-message">Loading...</div>
@@ -91,7 +95,7 @@ function MerchantShipwayDashboard() {
       ) : (
         <div className="card-metrics mb-4">
           <div className="metric-card">
-            <h4>Loyalty Score</h4>
+            <h4>My Loyalty Score</h4>
             <p className="grand-loyalty-score">{loyaltyScore}</p>
           </div>
           {/* You can add more cards here for churnRate etc. */}

@@ -5,6 +5,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import BACKEND_BASE_URL from '../config';
+import unicommerceLogo from '../unicommerce.png'; // add this line
 
 function MerchantUnicommerceDashboard() {
     const [loyaltyScore, setLoyaltyScore] = useState(null);
@@ -81,7 +82,9 @@ function MerchantUnicommerceDashboard() {
 
     return (
         <div className="unicommerce-dashboard container">
-            <h2 className="dashboard-title">My Unicommerce Loyalty</h2>
+            <div className="d-flex align-items-center mb-3 header-with-logo">
+                <img src={unicommerceLogo} alt="Unicommerce Logo" style={{ width: '200px' }} />
+            </div>
 
             {loading ? (
                 <div className="status-message">Loading...</div>
@@ -90,7 +93,7 @@ function MerchantUnicommerceDashboard() {
             ) : (
                 <div className="card-metrics mb-4">
                     <div className="metric-card">
-                        <h4>Loyalty Score</h4>
+                        <h4>My Loyalty Score</h4>
                         <p className="grand-loyalty-score">{loyaltyScore}</p>
                     </div>
                     {/* You can add more cards here for churnRate etc. */}
